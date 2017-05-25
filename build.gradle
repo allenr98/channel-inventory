@@ -19,14 +19,6 @@ apply plugin: 'org.springframework.boot'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8
 
-// Uncomment the following block to build as a war file.
-//apply plugin: 'war'
-//
-//war {
-//    baseName = 'channel-inventory'
-//    version =  '0.0.1'
-//}
-
 repositories {
 	mavenCentral()
 }
@@ -58,9 +50,6 @@ dependencies {
     compile files('lib/spigot-api-1.11.2-R0.1-SNAPSHOT.jar')
 
 	testCompile('org.springframework.boot:spring-boot-starter-test')
-
-// Uncomment this line when building a war file
-//	providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 }
 
 dependencyManagement {

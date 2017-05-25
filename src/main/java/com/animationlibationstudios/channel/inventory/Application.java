@@ -11,11 +11,14 @@ import de.btobastian.sdcf4j.CommandHandler;
 import de.btobastian.sdcf4j.handler.JavacordHandler;
 import org.slf4j.Logger;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan("com.animationlibationstudios.channel.inventory")
+@EnableAutoConfiguration
+@ComponentScan
 public class Application implements FutureCallback<DiscordAPI> {
 
 	/**
@@ -31,10 +34,12 @@ public class Application implements FutureCallback<DiscordAPI> {
             System.exit(-1);
             return;
         }
-        new Application().login(args[0], args[1]);
 
         // Start the Spring application
-		SpringApplication.run(Application.class, args);
+        ConfigurableApplicationContext context = SpringApplication.run(Application.class, args);
+
+        // Connect to the Discord API
+        context.getBean(Application.class).login(args[0], args[1]);
 	}
 
 	/**
