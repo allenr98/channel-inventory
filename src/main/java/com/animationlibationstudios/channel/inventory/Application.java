@@ -74,7 +74,7 @@ public class Application implements FutureCallback<DiscordAPI> {
      *
      * @param token A valid token.
      */
-    private void login(String token, String adminId) {
+    protected void login(String token, String adminId) {
         DiscordAPI api = Javacord.getApi(token, true);
         this.adminId = adminId;
         api.connect(this);
