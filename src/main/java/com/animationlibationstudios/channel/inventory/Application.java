@@ -12,8 +12,10 @@ import de.btobastian.sdcf4j.handler.JavacordHandler;
 import org.slf4j.Logger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
+@ComponentScan("com.animationlibationstudios.channel.inventory")
 public class Application implements FutureCallback<DiscordAPI> {
 
 	/**
@@ -72,7 +74,7 @@ public class Application implements FutureCallback<DiscordAPI> {
      *
      * @param token A valid token.
      */
-    public void login(String token, String adminId) {
+    private void login(String token, String adminId) {
         DiscordAPI api = Javacord.getApi(token, true);
         this.adminId = adminId;
         api.connect(this);
