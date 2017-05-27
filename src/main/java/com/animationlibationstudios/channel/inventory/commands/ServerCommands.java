@@ -19,6 +19,7 @@
 package com.animationlibationstudios.channel.inventory.commands;
 
 import com.animationlibationstudios.channel.inventory.model.Room;
+import com.animationlibationstudios.channel.inventory.persist.LocalFileRoomStorePersister;
 import com.animationlibationstudios.channel.inventory.persist.RoomStore;
 import com.animationlibationstudios.channel.inventory.persist.RoomStorePersister;
 import de.btobastian.javacord.DiscordAPI;
@@ -27,10 +28,10 @@ import de.btobastian.javacord.entities.message.MessageBuilder;
 import de.btobastian.javacord.entities.message.MessageDecoration;
 import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
-import org.jvnet.hk2.annotations.Service;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -41,11 +42,17 @@ import java.util.HashMap;
 public class ServerCommands implements CommandExecutor {
 
     @Autowired
-    @Qualifier("filesystem")
     private RoomStorePersister storage;
 
-    @Command(aliases = {"inv!!read"},
-            description = "inv!!read - read server contents from storage. Everything added since the last inv!server write will be lost!")
+    @PostConstruct
+    public void checkAndSetPersister() {
+        if (null == storage) {
+            storage = new LocalFileRoomStorePersister();
+        }
+    }
+
+    @Command(aliases = {"!!read"},
+            description = "!!read - read server contents from storage. Everything added since the last inv!server write will be lost!")
     public String onCommand(DiscordAPI api, String command, String[] args, Message message) {
         String server = message.getChannelReceiver().getServer().getName();
         String returnMessage = String.format("Contents of server %s successfully read from storage.", server);
@@ -62,8 +69,8 @@ public class ServerCommands implements CommandExecutor {
         return new MessageBuilder().appendDecoration(returnMessage, MessageDecoration.CODE_LONG).toString();
     }
 
-    @Command(aliases = {"inv!!save"},
-            description = "inv!!save - write the server contents to storage; at some point in the future, this " +
+    @Command(aliases = {"!!save"},
+            description = "!!save - write the server contents to storage; at some point in the future, this " +
                     "will happen automagically.")
     public String writeCommand(DiscordAPI api, String command, String[] args, Message message) {
         String server = message.getChannelReceiver().getServer().getName();

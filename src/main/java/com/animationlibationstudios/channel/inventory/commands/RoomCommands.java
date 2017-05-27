@@ -28,26 +28,30 @@ import de.btobastian.javacord.entities.message.MessageBuilder;
 import de.btobastian.javacord.entities.message.MessageDecoration;
 import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import java.util.LinkedList;
 
 /**
  * The chuck command.
  */
+@Service
 public class RoomCommands implements CommandExecutor {
-    @Command(aliases = {"inv!room", "inv!rm"},
-            description = "inv!room - What room am I in?\n" +
-                    "inv!room describe (desc, d) - get the room description.\n" +
-                    "inv!room describe -d <description> - replace the room's description.\n" +
-                    "inv!room remove (rem, r) - remove the room associated with the current channel.\n" +
+
+    @Command(aliases = {"!!room", "!!rm"},
+            description = "!!room - What room am I in?\n" +
+                    "!!room describe (desc, d) - get the room description.\n" +
+                    "!!room describe -d <description> - replace the room's description.\n" +
+                    "!!room remove (rem, r) - remove the room associated with the current channel.\n" +
                     "                           **Warning:** this will also remove all the room's inventory!\n" +
-                    "inv!room add <name> -d <description> - add the room with the specified name and description.")
+                    "!!room add <name> -d <description> - add the room with the specified name and description.")
     public String onCommand(DiscordAPI api, String command, String[] args, Message message) {
         String server = message.getChannelReceiver().getServer().getName();
         Channel channel = message.getChannelReceiver();
 
         Room room = RoomStore.DataStore.get(server, channel.getName());
-        String returnMessage = String.format("There is no room associated with channel #%s.  To create one, type inv!addRoom <name>", channel.getName());
+        String returnMessage = String.format("There is no room associated with channel #%s.  To create one, type !!addRoom <name>", channel.getName());
 
         if (args.length == 0) {
             if (room != null) {
@@ -80,7 +84,7 @@ public class RoomCommands implements CommandExecutor {
                     if (room != null) {
                         returnMessage = String.format(
                                 "There is already a room named '%s' associated with this channel.  To remove it and " +
-                                    "everything in it, type inv!room delete",
+                                    "everything in it, type !!room delete",
                                 room.getName());
                     } else {
                         room = new Room();
@@ -103,7 +107,7 @@ public class RoomCommands implements CommandExecutor {
         return new MessageBuilder().appendDecoration(returnMessage, MessageDecoration.CODE_LONG).toString();
     }
 
-    @Command(aliases = {"inv!cmd"}, description = "inv!cmd - echo back the command")
+    @Command(aliases = {"!!cmd"}, description = "!!cmd - echo back the command")
     public String echoBack(DiscordAPI api, String command, String[] args, Message message) {
         RoomCmd cmd = new RoomCmd(args);
 

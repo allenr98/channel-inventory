@@ -25,19 +25,21 @@ import de.btobastian.javacord.entities.message.MessageBuilder;
 import de.btobastian.javacord.entities.message.MessageDecoration;
 import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
+import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
 
 /**
  * The info command.
  */
+@Service
 public class InfoCommand implements CommandExecutor {
 
     private static final String ROBBIEWAN_ID = "306101364176715777";
 
     private final long startTime = System.currentTimeMillis();
 
-    @Command(aliases = {"+info"}, description = "Shows information about the bot")
+    @Command(aliases = {"!!info"}, description = "Shows information about the bot")
     public String onCommand(DiscordAPI api, String command, String[] args, Message message) {
         MessageBuilder msgBuilder = new MessageBuilder();
         msgBuilder.appendDecoration("General information", MessageDecoration.BOLD);

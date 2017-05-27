@@ -49,6 +49,10 @@ dependencies {
     compile files('lib/sdcf4j-javacord-1.0.4.jar')
     compile files('lib/spigot-api-1.11.2-R0.1-SNAPSHOT.jar')
 
+	// Javacord dependencies
+	compile group: 'com.mashape.unirest', name: 'unirest-java', version: '1.4.9'
+	compile 'com.neovisionaries:nv-websocket-client:2.2'
+
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 

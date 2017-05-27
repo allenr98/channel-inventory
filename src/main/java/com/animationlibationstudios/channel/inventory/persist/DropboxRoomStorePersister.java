@@ -4,7 +4,7 @@ import com.animationlibationstudios.channel.inventory.model.Room;
 import com.dropbox.core.DbxAuthInfo;
 import com.dropbox.core.json.JsonReader;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Map;
@@ -12,8 +12,6 @@ import java.util.Map;
 /**
  * This class takes an object instance and writes is as a JSON file to DropBox.
  */
-@Repository
-@Qualifier("dropbox")
 public class DropboxRoomStorePersister implements RoomStorePersister {
     @Override
     public Map<String, Room> readServer(String serverName) throws IOException {

@@ -23,12 +23,14 @@ import de.btobastian.javacord.entities.message.embed.EmbedBuilder;
 import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
 import de.btobastian.sdcf4j.CommandHandler;
+import org.springframework.stereotype.Service;
 
 import java.awt.*;
 
 /**
  * The help command.
  */
+@Service
 public class HelpCommand implements CommandExecutor {
 
     private final CommandHandler commandHandler;
@@ -42,7 +44,7 @@ public class HelpCommand implements CommandExecutor {
         this.commandHandler = commandHandler;
     }
 
-    @Command(aliases = {"+help", "+commands"}, description = "Shows this page")
+    @Command(aliases = {"!!help", "!!commands"}, description = "Shows this page")
     public void onHelpCommand(Message message) {
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("=== Commands ===");

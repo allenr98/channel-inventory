@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
-package com.animationlibationstudios.channel.inventory;
+package com.animationlibationstudios.channel.inventory.config;
 
 import de.btobastian.javacord.utils.LoggerUtil;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -42,7 +42,6 @@ public class ChannelInventory extends JavaPlugin {
             getPluginLoader().disablePlugin(this);
             return;
         }
-        new Application().login(getConfig().getString("token"), getConfig().getString("adminId"));
+        new DiscordConfig().login(getConfig().getString("token"), getConfig().getString("adminId"));
     }
-
 }
