@@ -18,10 +18,10 @@
  */
 package com.animationlibationstudios.channel.inventory.commands.utility;
 
+import com.animationlibationstudios.channel.inventory.commands.ApiCommandExecutor;
 import de.btobastian.javacord.entities.message.Message;
 import de.btobastian.javacord.entities.message.embed.EmbedBuilder;
 import de.btobastian.sdcf4j.Command;
-import de.btobastian.sdcf4j.CommandExecutor;
 import de.btobastian.sdcf4j.CommandHandler;
 import org.springframework.stereotype.Service;
 
@@ -31,16 +31,12 @@ import java.awt.*;
  * The help command.
  */
 @Service
-public class HelpCommand implements CommandExecutor {
+public class HelpCommand implements ApiCommandExecutor {
 
-    private final CommandHandler commandHandler;
+    private CommandHandler commandHandler;
 
-    /**
-     * Creates a new instance of this class.
-     *
-     * @param commandHandler The command handler.
-     */
-    public HelpCommand(CommandHandler commandHandler) {
+    @Override
+    public void setCommandHandler(CommandHandler commandHandler) {
         this.commandHandler = commandHandler;
     }
 

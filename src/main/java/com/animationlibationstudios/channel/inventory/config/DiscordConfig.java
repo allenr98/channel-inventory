@@ -1,6 +1,7 @@
 package com.animationlibationstudios.channel.inventory.config;
 
 import com.animationlibationstudios.channel.inventory.Application;
+import com.animationlibationstudios.channel.inventory.commands.ApiCommandExecutor;
 import com.google.common.util.concurrent.FutureCallback;
 import de.btobastian.javacord.DiscordAPI;
 import de.btobastian.javacord.Javacord;
@@ -10,6 +11,7 @@ import de.btobastian.sdcf4j.CommandHandler;
 import de.btobastian.sdcf4j.handler.JavacordHandler;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
@@ -37,20 +39,16 @@ public class DiscordConfig implements FutureCallback<DiscordAPI> {
         logger.info("Connected to discord account {}", api.getYourself());
         CommandHandler handler = new JavacordHandler(api);
         handler.addPermission(Application.adminId, "*");
-
         api.setMessageCacheSize(10000);
 
         // register commands
         for (CommandExecutor executor: commandExecutor) {
+            if (executor instanceof ApiCommandExecutor) {
+                ((ApiCommandExecutor) executor).setCommandHandler(handler);
+            }
+
             handler.registerCommand(executor);
         }
-
-//		handler.registerCommand(new HelpCommand(handler));
-//		handler.registerCommand(new InfoCommand());
-//		handler.registerCommand(new RoomCommands());
-//		handler.registerCommand(new ServerCommands());
-
-//        api.registerListener(new MessageListener());
     }
 
     /**
