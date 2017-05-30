@@ -34,7 +34,7 @@ import org.springframework.stereotype.Service;
 import java.util.LinkedList;
 
 /**
- * The chuck command.
+ * The room command.
  */
 @Service
 public class RoomCommands implements CommandExecutor {
@@ -51,7 +51,7 @@ public class RoomCommands implements CommandExecutor {
         Channel channel = message.getChannelReceiver();
 
         Room room = RoomStore.DataStore.get(server, channel.getName());
-        String returnMessage = String.format("There is no room associated with channel #%s.  To create one, type !!addRoom <name>", channel.getName());
+        String returnMessage = String.format("There is no room associated with channel #%s.  To create one, type !!room add <name>", channel.getName());
 
         if (args.length == 0) {
             if (room != null) {

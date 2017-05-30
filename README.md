@@ -24,7 +24,24 @@ room if you don't have them, and taking something out of a room will move it to 
 personal inventory).
 
 ## Command List
-_TBD_
+
+### Room Commands
+| Command | Description | Alias(es) |
+|---|---|---|
+| !!cmd | Echo back the command |
+| !!room | What room am I in? | !!rm |
+| !!room describe | Retrieve the room name and description | !!(room, rm) (describe, desc, d) |
+| !!room describe -d <description> | Replace the room's description. | !!(room, rm) (describe, desc, d) -d <description> |
+| !!room remove | Remove the room associated with the current channel. *Warning: this will also remove all the room's inventory!* | !!(room, rm)) (remove, rem, r) |
+| !!room add <name> -d <description> | Add the room with the specified name and description. | !!((room, rm) add <name> -d <description> |
+
+### Administrative/Utility Commands
+| Command | Description | Alias(es) |
+|---|---|---|
+| !!save | Write the server contents to storage; at some point in the future, this will happen automagically. | |
+| !!read | Read server contents from storage. Everything added since the last inv!server write will be lost! | |
+| !!help | Get command help | |
+| !!info | Shows information about the bot | |
 
 ## Neat Info About Hosting
 _TBD_
