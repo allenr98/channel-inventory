@@ -53,6 +53,9 @@ public class RoomCommands implements CommandExecutor {
         Room room = RoomStore.DataStore.get(server, channel.getName());
         String returnMessage = String.format("There is no room associated with channel #%s.  To create one, type !!room add <name>", channel.getName());
 
+        // TODO: pull valid commands into an enum so instead of "if-elseif-elsif-else" we can just use a switch statement.
+        // TODO: pull interior code blocks out into methods to make the code more readable.
+
         if (args.length == 0) {
             if (room != null) {
                 returnMessage = "Room: " + room.getName();
@@ -78,8 +81,7 @@ public class RoomCommands implements CommandExecutor {
                     RoomStore.DataStore.deleteRoom(server, room);
                     returnMessage = String.format("Room: %s deleted.", room.getName());
                 }
-            } else {
-                if (cmd.operation.equalsIgnoreCase("add")
+            } else if (cmd.operation.equalsIgnoreCase("add")
                         || cmd.operation.equalsIgnoreCase("a")) {
                     if (room != null) {
                         returnMessage = String.format(
@@ -100,7 +102,8 @@ public class RoomCommands implements CommandExecutor {
                         RoomStore.DataStore.putRoom(server, room);
                         returnMessage = String.format("Room %s successfully added.", room.getName());
                     }
-                }
+            } else {
+                returnMessage = "Invalid command.  Type !!help room for assistance with room commands.";
             }
         }
 
