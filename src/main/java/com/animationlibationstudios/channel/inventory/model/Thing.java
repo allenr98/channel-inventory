@@ -12,6 +12,8 @@ public class Thing {
     private String description;
     private ThingType type;
 
+    private int quantity;
+
     private List<Thing> thingsOn;
     private List<Thing> thingsIn;
     private List<Thing> thingsUnder;
@@ -22,6 +24,14 @@ public class Thing {
         this.thingsIn = new LinkedList<>();
         this.thingsUnder = new LinkedList<>();
         this.thingsBehind = new LinkedList<>();
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 
     public String getName() {
