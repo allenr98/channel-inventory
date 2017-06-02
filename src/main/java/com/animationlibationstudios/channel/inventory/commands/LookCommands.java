@@ -64,8 +64,7 @@ public class LookCommands implements CommandExecutor {
      * @return Response message.
      */
     private String buildLookPrepositionItemResponse(Room room, LookCmd lookCmd) {
-        String returnMessage;
-        returnMessage = String.format("Looking %s the %s:\n", lookCmd.preposition, lookCmd.item);
+        String returnMessage = String.format("Looking %s the %s:\n", lookCmd.preposition, lookCmd.item);
 
         // find that item
         Thing theThing = null;
@@ -126,8 +125,7 @@ public class LookCommands implements CommandExecutor {
      * @return Response message.
      */
     private String buildLookItemResponse(Room room, String item) {
-        String returnMessage;
-        returnMessage = String.format("Looking at the %s:\n", item);
+        String returnMessage = String.format("Looking at the %s:\n", item);
 
         // find that item
         Thing theThing = null;
@@ -171,6 +169,7 @@ public class LookCommands implements CommandExecutor {
      */
     private String buildLookResponse(Room room) {
         String returnMessage;
+
         if (null == room.getThings() || room.getThings().isEmpty()) {
             returnMessage = String.format("Room '%s' has nothing in it.", room.getName());
         } else {

@@ -20,6 +20,7 @@ package com.animationlibationstudios.channel.inventory.commands;
 
 import com.animationlibationstudios.channel.inventory.model.Room;
 import com.animationlibationstudios.channel.inventory.model.Thing;
+import com.animationlibationstudios.channel.inventory.model.enumeration.RoomOperations;
 import com.animationlibationstudios.channel.inventory.persist.RoomStore;
 import de.btobastian.javacord.DiscordAPI;
 import de.btobastian.javacord.entities.Channel;
@@ -28,7 +29,6 @@ import de.btobastian.javacord.entities.message.MessageBuilder;
 import de.btobastian.javacord.entities.message.MessageDecoration;
 import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedList;
@@ -51,63 +51,117 @@ public class RoomCommands implements CommandExecutor {
         Channel channel = message.getChannelReceiver();
 
         Room room = RoomStore.DataStore.get(server, channel.getName());
-        String returnMessage = String.format("There is no room associated with channel #%s.  To create one, type !!room add <name>", channel.getName());
-
-        // TODO: pull valid commands into an enum so instead of "if-elseif-elsif-else" we can just use a switch statement.
-        // TODO: pull interior code blocks out into methods to make the code more readable.
+        String returnMessage, defaultMessage = String.format("There is no room associated with channel #%s.  To create one, type !!room add <name>", channel.getName());
 
         if (args.length == 0) {
-            if (room != null) {
-                returnMessage = "Room: " + room.getName();
-            }
+            returnMessage = buildRoomResponse(room, defaultMessage);
         } else {
             RoomCmd cmd = new RoomCmd(args);
 
-            if (cmd.operation.equalsIgnoreCase("describe")
-                    || cmd.operation.equalsIgnoreCase("desc")
-                    || cmd.operation.equalsIgnoreCase("d")) {
-                if (room != null) {
-                    if (cmd.description != null && !cmd.description.isEmpty()) {
-                        // we're replacing, not just retrieving.
-                        room.setDescription(cmd.description);
-                    }
-
-                    returnMessage = String.format("Room: %s\nDescription:\n%s", room.getName(), room.getDescription());
-                }
-            } else if (cmd.operation.equalsIgnoreCase("remove")
-                    || cmd.operation.equalsIgnoreCase("rem")
-                    || cmd.operation.equalsIgnoreCase("r")) {
-                if (room != null) {
-                    RoomStore.DataStore.deleteRoom(server, room);
-                    returnMessage = String.format("Room: %s deleted.", room.getName());
-                }
-            } else if (cmd.operation.equalsIgnoreCase("add")
-                        || cmd.operation.equalsIgnoreCase("a")) {
-                    if (room != null) {
-                        returnMessage = String.format(
-                                "There is already a room named '%s' associated with this channel.  To remove it and " +
-                                    "everything in it, type !!room delete",
-                                room.getName());
-                    } else {
-                        room = new Room();
-                        room.setChannel(channel.getName());
-                        room.setName(cmd.roomName);
-                        room.setThings(new LinkedList<Thing>());
-
-                        if (args.length >= 3) {
-                            room.setDescription(cmd.description);
-                        } else {
-                            room.setDescription("This room is nondescript.");
-                        }
-                        RoomStore.DataStore.putRoom(server, room);
-                        returnMessage = String.format("Room %s successfully added.", room.getName());
-                    }
+            if (cmd.operation == RoomOperations.DESCRIBE
+                    || cmd.operation == RoomOperations.DESC
+                    || cmd.operation == RoomOperations.D) {
+                returnMessage = buildRoomDescribeResponse(room, cmd, defaultMessage);
+            } else if (cmd.operation == RoomOperations.REMOVE
+                    || cmd.operation == RoomOperations.REM
+                    || cmd.operation == RoomOperations.R) {
+                returnMessage = buildRoomRemoveResponse(server, room, defaultMessage);
+            } else if (cmd.operation == RoomOperations.ADD
+                        || cmd.operation == RoomOperations.A) {
+                returnMessage = buildRoomAddResponse(server, channel, room, cmd, args.length, defaultMessage);
             } else {
                 returnMessage = "Invalid command.  Type !!help room for assistance with room commands.";
             }
         }
 
         return new MessageBuilder().appendDecoration(returnMessage, MessageDecoration.CODE_LONG).toString();
+    }
+
+    /**
+     * The command is "!!room remove", build the response.
+     *
+     * @param server The current server.
+     * @param channel The current channel.
+     * @param room The current room.
+     * @param cmd The received command.
+     * @param argCount The number of arguments in the argument array.
+     * @param defaultMessage The message to return if no message can be built.
+     * @return The response message.
+     */
+    private String buildRoomAddResponse(String server, Channel channel, Room room, RoomCmd cmd, int argCount, String defaultMessage) {
+        String returnMessage = defaultMessage;
+        if (room != null) {
+            returnMessage = String.format(
+                    "There is already a room named '%s' associated with this channel.  To remove it and " +
+                        "everything in it, type !!room delete",
+                    room.getName());
+        } else {
+            room = new Room();
+            room.setChannel(channel.getName());
+            room.setName(cmd.roomName);
+            room.setThings(new LinkedList<Thing>());
+
+            if (argCount >= 3) {
+                room.setDescription(cmd.description);
+            } else {
+                room.setDescription("This room is nondescript.");
+            }
+            RoomStore.DataStore.putRoom(server, room);
+            returnMessage = String.format("Room %s successfully added.", room.getName());
+        }
+        return returnMessage;
+    }
+
+    /**
+     * The command is "!!room remove", build the response.
+     *
+     * @param server The current server.
+     * @param room The current room.
+     * @param defaultMessage The message to return if no message can be built.
+     * @return The response message.
+     */
+    private String buildRoomRemoveResponse(String server, Room room, String defaultMessage) {
+        String returnMessage = defaultMessage;
+        if (room != null) {
+            RoomStore.DataStore.deleteRoom(server, room);
+            returnMessage = String.format("Room: %s deleted.", room.getName());
+        }
+        return returnMessage;
+    }
+
+    /**
+     * Once it's been determined that the command received was "!!room describe", build the response message.
+     *
+     * @param room
+     * @param cmd
+     * @return
+     */
+    private String buildRoomDescribeResponse(Room room, RoomCmd cmd, String defaultMessage) {
+        String returnMessage = defaultMessage;
+        if (room != null) {
+            if (cmd.description != null && !cmd.description.isEmpty()) {
+                // we're replacing, not just retrieving.
+                room.setDescription(cmd.description);
+            }
+
+            returnMessage = String.format("Room: %s\nDescription:\n%s", room.getName(), room.getDescription());
+        }
+        return returnMessage;
+    }
+
+    /**
+     * The command was a simple "!!room", build the response.
+     *
+     * @param room The current room.
+     * @param defaultMessage The message to return if no message can be built.
+     * @return The response message.
+     */
+    private String buildRoomResponse(Room room, String defaultMessage) {
+        String returnMessage = defaultMessage;
+        if (room != null) {
+            returnMessage = "Room: " + room.getName();
+        }
+        return returnMessage;
     }
 
     @Command(aliases = {"!!cmd"}, description = "!!cmd - echo back the command")
@@ -118,57 +172,53 @@ public class RoomCommands implements CommandExecutor {
     }
 
     private class RoomCmd {
-        String operation;
+        RoomOperations operation;
         String roomName;
         String description;
 
-        private final String[] validCommands = {"add", "a", "remove", "rem", "r", "describe", "desc", "d"};
-
         RoomCmd(String[] args) {
             // Parse out and validate the operation
-            operation = "invalid";
+            operation = null;
 
-            for (String c: validCommands) {
-                if (c.equalsIgnoreCase(args[0])) {
-                    operation = c;
-                    break;
-                }
-            }
+            if (isOperation(args[0])) {
+                operation = RoomOperations.valueOf(args[0]);
 
-            // The next parameter, if there is one, should be the room name, but we want to allow it to be more than
-            // one word with spaces.  Let's grab all the next words until we hit the end of the line, or a "-d" to
-            // indicate we're about to switch to the description.
-            boolean buildingRoomName = true;
-            if (args.length > 1) {
-                StringBuilder roomSb = null;
-                StringBuilder descSb = null;
-                for (int i = 1; i < args.length; i++) {
-                    String token = args[i];
+                // The next parameter, if there is one, should be the room name, but we want to allow it to be more than
+                // one word with spaces.  Let's grab all the next words until we hit the end of the line, or a "-d" to
+                // indicate we're about to switch to the description.
+                boolean buildingRoomName = true;
+                if (args.length > 1) {
+                    StringBuilder roomSb = null;
+                    StringBuilder descSb = null;
+                    for (int i = 1; i < args.length; i++) {
+                        String token = args[i];
 
-                    if ("-d".equalsIgnoreCase(token)) {
-                        buildingRoomName = false;
-                    } else {
-                        if (buildingRoomName) {
-                            if (roomSb == null) {
-                                roomSb = new StringBuilder(token);
-                            } else {
-                                roomSb.append(" ").append(token);
-                            }
+                        if ("-d".equalsIgnoreCase(token)) {
+                            buildingRoomName = false;
                         } else {
-                            if (descSb == null) {
-                                descSb = new StringBuilder(token);
+                            if (buildingRoomName) {
+                                if (roomSb == null) {
+                                    roomSb = new StringBuilder(token);
+                                } else {
+                                    roomSb.append(" ").append(token);
+                                }
                             } else {
-                                descSb.append(" ").append(token);      }
+                                if (descSb == null) {
+                                    descSb = new StringBuilder(token);
+                                } else {
+                                    descSb.append(" ").append(token);
+                                }
+                            }
                         }
                     }
-                }
 
-                if (roomSb != null) {
-                    roomName = roomSb.toString();
-                }
+                    if (roomSb != null) {
+                        roomName = roomSb.toString();
+                    }
 
-                if (descSb != null) {
-                    description = descSb.toString();
+                    if (descSb != null) {
+                        description = descSb.toString();
+                    }
                 }
             }
         }
@@ -176,10 +226,30 @@ public class RoomCommands implements CommandExecutor {
         @Override
         public String toString() {
             return "RoomCmd {" +
-                    "operation='" + operation + '\'' +
+                    "operation='" + operation.name().toLowerCase() + '\'' +
                     ", roomName='" + roomName + '\'' +
                     ", description='" + description + '\'' +
                     '}';
         }
     }
+
+    /**
+     * Check if the word passed in is in the room operation list.
+     *
+     * @param value The word to check.
+     * @return True if it's a valid operation.
+     */
+    private boolean isOperation(String value) {
+        boolean result;
+
+        try {
+            RoomOperations.valueOf(value.toUpperCase());
+            result = true;
+        } catch (IllegalArgumentException e) {
+            result = false;
+        }
+
+        return result;
+    }
+
 }
