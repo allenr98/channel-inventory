@@ -149,7 +149,8 @@ public class LookCommands implements CommandExecutor {
                     builder.append(String.format("On top of the %s you see:\n", theThing.getName()));
                     foundThingsOn = true;
                 }
-                builder.append(String.format("- %s\n", thing.getName()));
+                String qty = theThing.getQuantity() > 1 ? String.format(" (%d)", theThing.getQuantity()) : "";
+                builder.append(String.format("- %s%s\n", thing.getName(), qty));
             }
             if (!foundThingsOn) {
                 returnMessage += String.format("There is nothing on top of the %s.", theThing.getName());
@@ -177,7 +178,8 @@ public class LookCommands implements CommandExecutor {
             builder.append(String.format("**Room %s contains the following:**\n", room.getName()));
 
             for (Thing thing : room.getThings()) {
-                builder.append(String.format("\t%s\n", thing.getName()));
+                String qty = thing.getQuantity() > 1 ? String.format(" (%d)", thing.getQuantity()) : "";
+                builder.append(String.format("- %s%s\n", thing.getName(), qty));
             }
 
             returnMessage = builder.toString();
