@@ -25,6 +25,10 @@ import java.util.List;
 @Service
 public class LookCommands implements CommandExecutor {
 
+    // TODO: Add code to include NPCs to the look commands.
+    // TODO: Allow !!look item commands to recurse into sublists of things, or as an alternative,
+    //       implement "!!look item (in, on, behind, under) item" form of the command.
+
     @Command(aliases = {"!!look"},
             description = "!!look - What do I see if I just stand in the room and look around?\n" +
                     "!!look <item> - Get a description of an item and a list of anything visible on top of it.\n" +

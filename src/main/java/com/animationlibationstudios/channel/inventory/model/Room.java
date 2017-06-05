@@ -12,6 +12,7 @@ public class Room {
     private String description;
 
     private List<Thing> things;
+    private List<Npc> npcs;
 
     public String getChannel() {
         return channel;
@@ -43,5 +44,13 @@ public class Room {
 
     public void setThings(List<Thing> things) {
         this.things = things;
+    }
+
+    public List<Npc> getNpcs() {
+        return this.npcs;
+    }
+
+    public void setNpcs(List<Npc> npcs) {
+        this.npcs = npcs;
     }
 }
