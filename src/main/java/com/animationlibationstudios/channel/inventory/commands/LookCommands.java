@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -48,7 +49,7 @@ public class LookCommands implements CommandExecutor {
             if (args.length == 0) {
                 returnMessage = buildLookResponse(room);
             } else if (lookCmd.commandType.equals("item")) {
-                returnMessage = buildLookItemResponse(room, lookCmd.item);
+                returnMessage = buildLookItemResponseRecursively(room, lookCmd.item);
             } else if (lookCmd.commandType.equals("preposition-item")) {
                 returnMessage = buildLookPrepositionItemResponse(room, lookCmd);
             } else {
@@ -165,6 +166,28 @@ public class LookCommands implements CommandExecutor {
         return returnMessage;
     }
 
+    private String buildLookItemResponseRecursively(Room room, String item) {
+        // find that item(s)
+        List<FoundThing> listOfThings = findAllTheThingsInTheRoom(item, room);
+        String returnMessage = String.format("Looking at the %s:\n", item);
+
+        if (listOfThings == null || listOfThings.isEmpty()) {
+            returnMessage = String.format("There is no %s in this room.", item);
+        } else {
+            if (listOfThings.size() == 1) {
+                returnMessage = String.format("Looking at the %s:\n", listOfThings.get(0).toString());
+                returnMessage += String.format("%s\n", listOfThings.get(0).thing.getDescription());
+            } else {
+                StringBuilder builder = new StringBuilder(String.format("There are %d things in this room with that name!\n", listOfThings.size()));
+                for (FoundThing thing : listOfThings) {
+                    builder.append(String.format("\t- %s\n", thing.toString()));
+                }
+                returnMessage += builder.toString();
+            }
+        }
+        return returnMessage;
+    }
+
     /**
      * Once it's been determined that the command received was "!!look" with no other parameters, build the response
      * message.
@@ -269,5 +292,107 @@ public class LookCommands implements CommandExecutor {
         }
 
         return builder.toString();
+    }
+
+    /**
+     * When searching for things, we'll build a list of matching things we found and where we found
+     * them.  If the location is null, the thing in question is just in the room.
+     * If thing is found in a child of a child of a child, etc., the location can get quite long - like
+     * "in the leather pouch in the small wooden box in the jewelry case in the safe behind the oil painting"
+     */
+    private class FoundThing {
+        private Thing thing;
+        private String location;
+
+        FoundThing(Thing thing, String location) {
+            this.thing = thing;
+            this.location = location;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder(thing.getName());
+            if (!location.isEmpty()) {
+                builder.append(String.format(" (%s)", location)).toString();
+            }
+            return builder.toString();
+        }
+    }
+
+    private List<FoundThing> findTheThingsInTheThing(String name, String location, Thing thing) {
+        List<FoundThing> result = new LinkedList<FoundThing>();
+
+        // IN
+        for (Thing thingInTheThing: thing.getThingsIn()) {
+            String newLocation = String.format("in the %s %s ", thing.getName(), location);
+
+            if (thingInTheThing.getThingsIn() != null && !thingInTheThing.getThingsIn().isEmpty()) {
+                result.addAll(findTheThingsInTheThing(name, newLocation, thingInTheThing));
+            }
+            if (thingInTheThing.getName().equalsIgnoreCase(name)) {
+                result.add(new FoundThing(thingInTheThing, newLocation));
+            }
+        }
+
+        // ON
+        for (Thing thingOnTheThing: thing.getThingsOn()) {
+            String newLocation = String.format("on the %s %s ", thing.getName(), location);
+
+            if (thingOnTheThing.getThingsOn() != null && !thingOnTheThing.getThingsOn().isEmpty()) {
+                result.addAll(findTheThingsInTheThing(name, newLocation, thingOnTheThing));
+            }
+            if (thingOnTheThing.getName().equalsIgnoreCase(name)) {
+                result.add(new FoundThing(thingOnTheThing, newLocation));
+            }
+        }
+
+        // UNDER
+        for (Thing thingUnderTheThing: thing.getThingsUnder()) {
+            String newLocation = String.format("under the %s %s ", thing.getName(), location);
+
+            if (thingUnderTheThing.getThingsOn() != null && !thingUnderTheThing.getThingsOn().isEmpty()) {
+                result.addAll(findTheThingsInTheThing(name, newLocation, thingUnderTheThing));
+            }
+            if (thingUnderTheThing.getName().equalsIgnoreCase(name)) {
+                result.add(new FoundThing(thingUnderTheThing, newLocation));
+            }
+        }
+
+        // BEHIND
+        for (Thing thingBehindTheThing: thing.getThingsBehind()) {
+            String newLocation = String.format("behind the %s %s ", thing.getName(), location);
+
+            if (thingBehindTheThing.getThingsOn() != null && !thingBehindTheThing.getThingsOn().isEmpty()) {
+                result.addAll(findTheThingsInTheThing(name, newLocation, thingBehindTheThing));
+            }
+            if (thingBehindTheThing.getName().equalsIgnoreCase(name)) {
+                result.add(new FoundThing(thingBehindTheThing, newLocation));
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Given a name (as from a !!look command), search the entire inventory of the room for something that
+     * matches.  Return a list of matches along with where it was (e.g. "in the cupboard").
+     *
+     * @param name The name of the thing to find.
+     * @param room The room in which to look.
+     * @return A list of all the places it was found.
+     */
+    private List<FoundThing> findAllTheThingsInTheRoom(String name, Room room) {
+        List<FoundThing> result = new LinkedList<FoundThing>();
+        String theThingIsInTheRoom = "";
+
+        // In the room
+        for (Thing roomThing: room.getThings()) {
+            if (name.equalsIgnoreCase(roomThing.getName())) {
+                result.add(new FoundThing(roomThing, theThingIsInTheRoom));
+            }
+            result.addAll(findTheThingsInTheThing(name, theThingIsInTheRoom, roomThing));
+        }
+
+        return result;
     }
 }
