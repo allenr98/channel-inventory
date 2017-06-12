@@ -214,6 +214,9 @@ public class LookCommands implements CommandExecutor {
         return returnMessage;
     }
 
+    /**
+     * Class representing the parsed command submitted.
+     */
     private class LookCmd {
         String commandType;
         Preposition preposition;
@@ -319,6 +322,14 @@ public class LookCommands implements CommandExecutor {
         }
     }
 
+    /**
+     * Look for a named thing in other things - all the other things.
+     *
+     * @param name The name of the thing to find.
+     * @param location Where we've looked before (builds a string of prepositional phrases describing where the thing is located).
+     * @param thing The thing we're looking to see if there are named things in/behind/under/on.
+     * @return A list of things found in the thing.
+     */
     private List<FoundThing> findTheThingsInTheThing(String name, String location, Thing thing) {
         List<FoundThing> result = new LinkedList<FoundThing>();
 
