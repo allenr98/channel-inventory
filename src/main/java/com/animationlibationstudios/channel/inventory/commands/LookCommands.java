@@ -1,5 +1,6 @@
 package com.animationlibationstudios.channel.inventory.commands;
 
+import com.animationlibationstudios.channel.inventory.commands.utility.CommandArgumentParserUtil;
 import com.animationlibationstudios.channel.inventory.model.Room;
 import com.animationlibationstudios.channel.inventory.model.Thing;
 import com.animationlibationstudios.channel.inventory.model.enumeration.Preposition;
@@ -11,6 +12,7 @@ import de.btobastian.javacord.entities.message.MessageBuilder;
 import de.btobastian.javacord.entities.message.MessageDecoration;
 import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -29,6 +31,9 @@ public class LookCommands implements CommandExecutor {
     // TODO: Add code to include NPCs to the look commands.
     // TODO: Allow !!look item commands to recurse into sublists of things, or as an alternative,
     //       implement "!!look item (in, on, behind, under) item" form of the command.
+
+    @Autowired
+    CommandArgumentParserUtil commandArgumentParserUtil;
 
     @Command(aliases = {"!!look"},
             description = "!!look - What do I see if I just stand in the room and look around?\n" +
@@ -236,16 +241,16 @@ public class LookCommands implements CommandExecutor {
                 // This could mean many things - it could be a preposition and an item, or it could be no preposition
                 // and a multi-word item name, or it could be a preposition and a multi-word item name.  We'll have to
                 // deal with all possibilities.
-                if (isPreposition(args[0])) {
+                if (commandArgumentParserUtil.isPreposition(args[0])) {
                     // !!look <preposition> <item>
                     commandType = "preposition-item";
                     preposition = Preposition.valueOf(args[0].toUpperCase());
 
                     // assume the rest of the line is the item name
-                    item = parseItemName(Arrays.copyOfRange(args,1,args.length));
+                    item = commandArgumentParserUtil.parseItemName(Arrays.copyOfRange(args,1,args.length));
                 } else {
                     commandType = "item";
-                    item = parseItemName(args);
+                    item = commandArgumentParserUtil.parseItemName(args);
                 }
             }
         }
@@ -258,43 +263,6 @@ public class LookCommands implements CommandExecutor {
                         ", item='" + item + '\'' +
                     '}';
         }
-    }
-
-    /**
-     * Check if the word passed in is in the preposition list.
-     *
-     * @param value The word to check.
-     * @return True if it's a preposition.
-     */
-    private boolean isPreposition(String value) {
-        boolean result;
-
-        try {
-            Preposition.valueOf(value.toUpperCase());
-            result = true;
-        } catch (IllegalArgumentException e) {
-            result = false;
-        }
-
-        return result;
-    }
-
-    /**
-     * Iterate through the words array and stop if we get to a preposition.
-     *
-     * @param words - array of strings from the command argument list.
-     * @return String
-     */
-    private String parseItemName(String[] words) {
-        StringBuilder builder = new StringBuilder();
-        String space = "";
-        for (String word: words) {
-            if (isPreposition(word)) { break; }
-            builder.append(space).append(word);
-            if ("".equals(space)) { space = " "; };
-        }
-
-        return builder.toString();
     }
 
     /**
