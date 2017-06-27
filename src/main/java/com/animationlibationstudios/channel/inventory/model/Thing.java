@@ -13,6 +13,7 @@ public class Thing {
     private ThingType type;
 
     private int quantity;
+    private String price;
 
     private List<Thing> thingsOn;
     private List<Thing> thingsIn;
@@ -24,6 +25,14 @@ public class Thing {
         this.thingsIn = new LinkedList<>();
         this.thingsUnder = new LinkedList<>();
         this.thingsBehind = new LinkedList<>();
+    }
+
+    public String getPrice() {
+        return price;
+    }
+
+    public void setPrice(String price) {
+        this.price = price;
     }
 
     public int getQuantity() {
