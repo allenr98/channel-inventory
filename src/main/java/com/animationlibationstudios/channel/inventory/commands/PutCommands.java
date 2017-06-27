@@ -25,9 +25,9 @@ public class PutCommands implements CommandExecutor {
 
     @Command(aliases = {"!!put"},
             description = "!!put <item> - Add 'item' to the current room.\n" +
-                    "!!put <item> -q # - Add # items to the current room.\n" +
-                    "!!put <item1> (on, in, under, behind) <item2> - Put 'item1' in/on/under/behind 'item2'.\n" +
-                    "!!put <item> (on, in, under, behind) <item2> -q # - Put # 'item1's in/on/under/behind 'item2'.\n")
+                    "!!put <item> -q # - Add # items to the current room.\n") // +
+//                    "!!put <item1> (on, in, under, behind) <item2> - Put 'item1' in/on/under/behind 'item2'.\n" +
+//                    "!!put <item> (on, in, under, behind) <item2> -q # - Put # 'item1's in/on/under/behind 'item2'.\n")
     public String onCommand(DiscordAPI api, String command, String[] args, Message message) {
         String server = message.getChannelReceiver().getServer().getName();
         Channel channel = message.getChannelReceiver();

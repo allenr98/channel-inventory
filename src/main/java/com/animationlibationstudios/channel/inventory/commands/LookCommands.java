@@ -37,8 +37,8 @@ public class LookCommands implements CommandExecutor {
 
     @Command(aliases = {"!!look"},
             description = "!!look - What do I see if I just stand in the room and look around?\n" +
-                    "!!look <item> - Get a description of an item and a list of anything visible on top of it.\n" +
-                    "!!look (on, in, under, behind) <item> - See what's on, in, under, or behind the item.")
+                    "!!look <item> - Get a description of an item and a list of anything visible on top of it.\n")
+ // don't do this yet    "!!look (on, in, under, behind) <item> - See what's on, in, under, or behind the item.")
     public String onCommand(DiscordAPI api, String command, String[] args, Message message) {
         String server = message.getChannelReceiver().getServer().getName();
         Channel channel = message.getChannelReceiver();
@@ -54,7 +54,7 @@ public class LookCommands implements CommandExecutor {
             if (args.length == 0) {
                 returnMessage = buildLookResponse(room);
             } else if (lookCmd.commandType.equals("item")) {
-                returnMessage = buildLookItemResponseRecursively(room, lookCmd.item);
+                returnMessage = buildLookItemResponse(room, lookCmd.item); // buildLookItemResponseRecursively(room, lookCmd.item);
             } else if (lookCmd.commandType.equals("preposition-item")) {
                 returnMessage = buildLookPrepositionItemResponse(room, lookCmd);
             } else {
@@ -151,22 +151,23 @@ public class LookCommands implements CommandExecutor {
         } else {
             returnMessage += String.format("%s\n", theThing.getDescription());
 
-            // Now list the things on the item being looked at
-            StringBuilder builder = new StringBuilder();
-            boolean foundThingsOn = false;
-            for (Thing thing: theThing.getThingsOn()) {
-                if (!foundThingsOn) {
-                    builder.append(String.format("On top of the %s you see:\n", theThing.getName()));
-                    foundThingsOn = true;
-                }
-                String qty = theThing.getQuantity() > 1 ? String.format(" (%d)", theThing.getQuantity()) : "";
-                builder.append(String.format("- %s%s\n", thing.getName(), qty));
-            }
-            if (!foundThingsOn) {
-                returnMessage += String.format("There is nothing on top of the %s.", theThing.getName());
-            } else {
-                returnMessage += builder.toString();
-            }
+// Skip the preposition stuff for now.
+//            // Now list the things on the item being looked at
+//            StringBuilder builder = new StringBuilder();
+//            boolean foundThingsOn = false;
+//            for (Thing thing: theThing.getThingsOn()) {
+//                if (!foundThingsOn) {
+//                    builder.append(String.format("On top of the %s you see:\n", theThing.getName()));
+//                    foundThingsOn = true;
+//                }
+//                String qty = theThing.getQuantity() > 1 ? String.format(" (%d)", theThing.getQuantity()) : "";
+//                builder.append(String.format("- %s%s\n", thing.getName(), qty));
+//            }
+//            if (!foundThingsOn) {
+//                returnMessage += String.format("There is nothing on top of the %s.", theThing.getName());
+//            } else {
+//                returnMessage += builder.toString();
+//            }
         }
         return returnMessage;
     }
@@ -241,17 +242,22 @@ public class LookCommands implements CommandExecutor {
                 // This could mean many things - it could be a preposition and an item, or it could be no preposition
                 // and a multi-word item name, or it could be a preposition and a multi-word item name.  We'll have to
                 // deal with all possibilities.
-                if (commandArgumentParserUtil.isPreposition(args[0])) {
-                    // !!look <preposition> <item>
-                    commandType = "preposition-item";
-                    preposition = Preposition.valueOf(args[0].toUpperCase());
 
-                    // assume the rest of the line is the item name
-                    item = commandArgumentParserUtil.parseItemName(Arrays.copyOfRange(args,1,args.length));
-                } else {
+                /**
+                 * Kludgey code warning: for now we're not allowing prepositions; assume if the args length is > 1,
+                 * that's a multi word item description.
+                 */
+//                if (commandArgumentParserUtil.isPreposition(args[0])) {
+//                    // !!look <preposition> <item>
+//                    commandType = "preposition-item";
+//                    preposition = Preposition.valueOf(args[0].toUpperCase());
+//
+//                    // assume the rest of the line is the item name
+//                    item = commandArgumentParserUtil.parseItemName(Arrays.copyOfRange(args,1,args.length));
+//                } else {
                     commandType = "item";
                     item = commandArgumentParserUtil.parseItemName(args);
-                }
+//                }
             }
         }
 

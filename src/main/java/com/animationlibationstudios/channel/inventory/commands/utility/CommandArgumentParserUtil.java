@@ -38,9 +38,10 @@ public class CommandArgumentParserUtil {
         StringBuilder builder = new StringBuilder();
         String space = "";
         for (String word: words) {
-            if (isPreposition(word)) { break; }
+// don't care about prepositions for now...            if (isPreposition(word)) { break; }
+            if ("-q".equalsIgnoreCase(word)) { break; } // break if we hit a quantity arg
             builder.append(space).append(word);
-            if ("".equals(space)) { space = " "; };
+            if ("".equals(space)) { space = " "; }
         }
 
         return builder.toString();
