@@ -78,7 +78,7 @@ public class PutCommands implements CommandExecutor {
     }
 
     /**
-     *
+     * Do the work of adding the thing to the room.
      */
     private String putThing(String server, Room room, Thing thing) {
         String returnMessage;
@@ -109,6 +109,11 @@ public class PutCommands implements CommandExecutor {
             returnMessage = "Added a new '" + thing.getName() + "' to the room.";
         } else {
             if (removed) {
+                if (room.getRoomAdmin() != null) {
+                    room.getRoomAdmin().sendMessage(String.format("All of the %s(s) have been removed " +
+                            "from server '%s', channel '%s'.",
+                            thing.getName(), server, room.getChannel()));
+                }
                 returnMessage = String.format("Removed all %s(s) from the room.", thing.getName());
             } else {
                 returnMessage = String.format("Added %d more %s(s) to the room for a new total of %d.",

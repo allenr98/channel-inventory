@@ -63,16 +63,12 @@ public class AdminCommands implements CommandExecutor {
                     if (target == null) {
                         returnMessage = setRoomAdmin(
                                 server,
-                                serverName,
-                                channel,
                                 room,
                                 requestor,
                                 requestor);
                     } else {
                         returnMessage = setRoomAdmin(
                                 server,
-                                serverName,
-                                channel,
                                 room,
                                 requestor,
                                 target);
@@ -84,8 +80,6 @@ public class AdminCommands implements CommandExecutor {
                         } else {
                             returnMessage = setRoomAdmin(
                                     server,
-                                    serverName,
-                                    channel,
                                     room,
                                     requestor,
                                     target);
@@ -102,7 +96,7 @@ public class AdminCommands implements CommandExecutor {
 
     }
 
-    private String setRoomAdmin(Server server, String serverName, Channel channel, Room room, User requestor, User target) {
+    private String setRoomAdmin(Server server, Room room, User requestor, User target) {
         String returnMessage;
         room.setRoomAdmin(target);
         returnMessage = String.format(
@@ -110,13 +104,14 @@ public class AdminCommands implements CommandExecutor {
         target.sendMessage(
             String.format("You have been set as the room inventory admin for the '%s' server's " +
                     "'%s' channel.  This means you will receive private messages for certain " +
-                    "inventory events.", serverName, channel.getName())
+                    "inventory events.", server.getName(), room.getChannel())
         );
 
         try {
-            storage.writeServer(serverName);
+            storage.writeServer(server.getName());
         } catch (IOException e) {
-            returnMessage = String.format("Error writing %s data to file. \n %s", server, e.getMessage());
+            returnMessage = String.format("Error writing %s data to file. \n %s",
+                    server.getName(), e.getMessage());
         }
         return returnMessage;
     }
