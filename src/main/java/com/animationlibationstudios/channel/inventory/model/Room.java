@@ -1,5 +1,7 @@
 package com.animationlibationstudios.channel.inventory.model;
 
+import de.btobastian.javacord.entities.User;
+
 import java.util.List;
 
 /**
@@ -10,6 +12,7 @@ public class Room {
     private String channel;
     private String name;
     private String description;
+    private User roomAdmin;
 
     private List<Thing> things;
     private List<Npc> npcs;
@@ -52,5 +55,13 @@ public class Room {
 
     public void setNpcs(List<Npc> npcs) {
         this.npcs = npcs;
+    }
+
+    public User getRoomAdmin() {
+        return roomAdmin;
+    }
+
+    public void setRoomAdmin(User roomAdmin) {
+        this.roomAdmin = roomAdmin;
     }
 }

@@ -8,6 +8,7 @@ import com.animationlibationstudios.channel.inventory.persist.RoomStore;
 import com.animationlibationstudios.channel.inventory.persist.RoomStorePersister;
 import de.btobastian.javacord.DiscordAPI;
 import de.btobastian.javacord.entities.Channel;
+import de.btobastian.javacord.entities.User;
 import de.btobastian.javacord.entities.message.Message;
 import de.btobastian.javacord.entities.message.MessageBuilder;
 import de.btobastian.javacord.entities.message.MessageDecoration;
@@ -49,7 +50,7 @@ public class PutCommands implements CommandExecutor {
         String returnMessage = String.format("There is no room associated with channel #%s.  To create one, type !!room add <name>", channel.getName());
 
         if (room != null) {
-            PutCommands.PutCmd putCmd = new PutCommands.PutCmd(args);
+            PutCmd putCmd = new PutCmd(args);
 
             if (putCmd.commandType.equals("item")) {
                 Thing thing = new Thing();
