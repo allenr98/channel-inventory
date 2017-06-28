@@ -18,10 +18,12 @@
  */
 package com.animationlibationstudios.channel.inventory.commands;
 
+import com.animationlibationstudios.channel.inventory.commands.utility.CommandArgumentParserUtil;
 import com.animationlibationstudios.channel.inventory.model.Room;
 import com.animationlibationstudios.channel.inventory.model.Thing;
 import com.animationlibationstudios.channel.inventory.model.enumeration.RoomOperations;
 import com.animationlibationstudios.channel.inventory.persist.RoomStore;
+import com.animationlibationstudios.channel.inventory.persist.RoomStorePersister;
 import de.btobastian.javacord.DiscordAPI;
 import de.btobastian.javacord.entities.Channel;
 import de.btobastian.javacord.entities.message.Message;
@@ -29,8 +31,10 @@ import de.btobastian.javacord.entities.message.MessageBuilder;
 import de.btobastian.javacord.entities.message.MessageDecoration;
 import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.LinkedList;
 
 /**
@@ -38,6 +42,12 @@ import java.util.LinkedList;
  */
 @Service
 public class RoomCommands implements CommandExecutor {
+
+    @Autowired
+    private RoomStorePersister storage;
+
+    @Autowired
+    private CommandArgumentParserUtil commandArgumentParserUtil;
 
     @Command(aliases = {"!!room", "!!rm"},
             description = "!!room - What room am I in?\n" +
@@ -50,6 +60,9 @@ public class RoomCommands implements CommandExecutor {
         String server = message.getChannelReceiver().getServer().getName();
         Channel channel = message.getChannelReceiver();
 
+        // Start by loading the server file if we need to, and if we can.
+        commandArgumentParserUtil.checkAndRead(server);
+
         Room room = RoomStore.DataStore.get(server, channel.getName());
         String returnMessage, defaultMessage = String.format("There is no room associated with channel #%s.  To create one, type !!room add <name>", channel.getName());
 
@@ -61,7 +74,7 @@ public class RoomCommands implements CommandExecutor {
             if (cmd.operation == RoomOperations.DESCRIBE
                     || cmd.operation == RoomOperations.DESC
                     || cmd.operation == RoomOperations.D) {
-                returnMessage = buildRoomDescribeResponse(room, cmd, defaultMessage);
+                returnMessage = buildRoomDescribeResponse(server, room, cmd, defaultMessage);
             } else if (cmd.operation == RoomOperations.REMOVE
                     || cmd.operation == RoomOperations.REM
                     || cmd.operation == RoomOperations.R) {
@@ -107,7 +120,13 @@ public class RoomCommands implements CommandExecutor {
                 room.setDescription("This room is nondescript.");
             }
             RoomStore.DataStore.putRoom(server, room);
-            returnMessage = String.format("Room %s successfully added.", room.getName());
+
+            try {
+                storage.writeServer(server);
+                returnMessage = String.format("Room %s successfully added.", room.getName());
+            } catch (IOException e) {
+                returnMessage = String.format("Error writing %s data to file. \n %s", server, e.getMessage());
+            }
         }
         return returnMessage;
     }
@@ -124,7 +143,12 @@ public class RoomCommands implements CommandExecutor {
         String returnMessage = defaultMessage;
         if (room != null) {
             RoomStore.DataStore.deleteRoom(server, room);
-            returnMessage = String.format("Room: %s deleted.", room.getName());
+            try {
+                storage.writeServer(server);
+                returnMessage = String.format("Room: %s deleted.", room.getName());
+            } catch (IOException e) {
+                returnMessage = String.format("Error writing %s data to file. \n %s", server, e.getMessage());
+            }
         }
         return returnMessage;
     }
@@ -136,15 +160,27 @@ public class RoomCommands implements CommandExecutor {
      * @param cmd
      * @return
      */
-    private String buildRoomDescribeResponse(Room room, RoomCmd cmd, String defaultMessage) {
+    private String buildRoomDescribeResponse(String server, Room room, RoomCmd cmd, String defaultMessage) {
         String returnMessage = defaultMessage;
+        boolean success = true;
+
         if (room != null) {
             if (cmd.description != null && !cmd.description.isEmpty()) {
                 // we're replacing, not just retrieving.
                 room.setDescription(cmd.description);
+
+                // We changed the description, so let's persist it.
+                try {
+                    storage.writeServer(server);
+                } catch (IOException e) {
+                    returnMessage = String.format("Error writing %s data to file. \n %s", server, e.getMessage());
+                    success = false;
+                }
             }
 
-            returnMessage = String.format("Room: %s\nDescription:\n%s", room.getName(), room.getDescription());
+            if (success) {
+                returnMessage = String.format("Room: %s\nDescription:\n%s", room.getName(), room.getDescription());
+            }
         }
         return returnMessage;
     }

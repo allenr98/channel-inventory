@@ -1,13 +1,51 @@
 package com.animationlibationstudios.channel.inventory.commands.utility;
 
+import com.animationlibationstudios.channel.inventory.model.Room;
 import com.animationlibationstudios.channel.inventory.model.enumeration.Preposition;
+import com.animationlibationstudios.channel.inventory.persist.RoomStore;
+import com.animationlibationstudios.channel.inventory.persist.RoomStorePersister;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * Helpful methods for parsing commands.
  */
 @Component
 public class CommandArgumentParserUtil {
+
+    @Autowired
+    private RoomStorePersister storage;
+
+    // oo operation...do nothing.
+    private void noop() {}
+
+    /**
+     * Call on any interaction with a particular server.  If the server has already been loaded from the datastore, it
+     * will do nothing.  If it hasn't, it will attempt to load it.
+     *
+     * @param server
+     * @throws IOException
+     */
+    public void checkAndRead(String server) {
+        if (!RoomStore.DataStore.hasServer(server)) {
+            try {
+                HashMap<String, Room> serverContents = new HashMap<>();
+                serverContents.putAll(storage.readServer(server));
+                if (null != server && !server.isEmpty() && !serverContents.isEmpty()) {
+                    RoomStore.DataStore.putServer(server);
+                    for (String channel: serverContents.keySet()) {
+                        RoomStore.DataStore.putRoom(server, serverContents.get(channel));
+                    }
+                }
+            } catch (IOException e) {
+                // The server doesn't have a file.  Not to worry, it'll get created the first time we write something
+                noop();
+            }
+        }
+    }
 
     /**
      * Check if the word passed in is in the preposition list.
@@ -41,6 +79,7 @@ public class CommandArgumentParserUtil {
 // don't care about prepositions for now...            if (isPreposition(word)) { break; }
             if ("-q".equalsIgnoreCase(word)) { break; } // break if we hit a quantity arg
             if ("-d".equalsIgnoreCase(word)) { break; } // break if we hit a description arg
+            if ("-p".equalsIgnoreCase(word)) { break; } // break if we hit a description arg
             builder.append(space).append(word);
             if ("".equals(space)) { space = " "; }
         }
@@ -54,7 +93,7 @@ public class CommandArgumentParserUtil {
      * @param words - array of strings from the command argument list.
      * @return String
      */
-    public String parseDescription(String[] words) {
+    public String parseArgument(String argument, String[] words) {
         StringBuilder builder = new StringBuilder();
         String space = "";
         boolean start = false;
@@ -62,21 +101,14 @@ public class CommandArgumentParserUtil {
 // don't care about prepositions for now...            if (isPreposition(word)) { break; }
             // If we've started collecting description words and we hit a "-q" then we're done; break.  Otherwise just
             // keep skipping past.
-            if ("-q".equalsIgnoreCase(word)) {
+            if ("-q".equalsIgnoreCase(word) || "-p".equalsIgnoreCase(word) || "-p".equalsIgnoreCase(word)) {
                 if (start) {
                     break;
                 }
             }
-            if ("-d".equalsIgnoreCase(word)) {
-                // if we hit a second "-d" after we've started, just quit and ignore it.
-                if (start) {
-                    break;
-                }
-
+            if (argument.equalsIgnoreCase(word)) {
                 start = true;
-            }
-
-            if (start) {
+            } else if (start) {
                 builder.append(space).append(word);
                 if ("".equals(space)) {
                     space = " ";
@@ -86,5 +118,4 @@ public class CommandArgumentParserUtil {
 
         return builder.toString();
     }
-
 }

@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -33,7 +32,7 @@ public class LookCommands implements CommandExecutor {
     //       implement "!!look item (in, on, behind, under) item" form of the command.
 
     @Autowired
-    CommandArgumentParserUtil commandArgumentParserUtil;
+    private CommandArgumentParserUtil commandArgumentParserUtil;
 
     @Command(aliases = {"!!look"},
             description = "!!look - What do I see if I just stand in the room and look around?\n" +
@@ -42,6 +41,9 @@ public class LookCommands implements CommandExecutor {
     public String onCommand(DiscordAPI api, String command, String[] args, Message message) {
         String server = message.getChannelReceiver().getServer().getName();
         Channel channel = message.getChannelReceiver();
+
+        // Start by loading the server file if we need to, and if we can.
+        commandArgumentParserUtil.checkAndRead(server);
 
         Room room = RoomStore.DataStore.get(server, channel.getName());
         String returnMessage = String.format("There is no room associated with channel #%s.  To create one, type !!room add <name>", channel.getName());
@@ -212,7 +214,8 @@ public class LookCommands implements CommandExecutor {
 
             for (Thing thing : room.getThings()) {
                 String qty = thing.getQuantity() > 1 ? String.format(" (%d)", thing.getQuantity()) : "";
-                builder.append(String.format("- %s%s\n", thing.getName(), qty));
+                String price = thing.getPrice().isEmpty() ? "" : String.format(" [%s]", thing.getPrice());
+                builder.append(String.format("- %s%s%s\n", thing.getName(), qty, price));
             }
 
             returnMessage = builder.toString();

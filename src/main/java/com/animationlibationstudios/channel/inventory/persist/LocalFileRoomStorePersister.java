@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -14,7 +15,7 @@ import java.util.Map;
 /**
  * This class takes an object instance and writes is as a JSON file to the file system.
  */
-@Component
+@Repository
 public class LocalFileRoomStorePersister implements RoomStorePersister {
 
     private static final String defaultFilePath = "inventory-bot/";

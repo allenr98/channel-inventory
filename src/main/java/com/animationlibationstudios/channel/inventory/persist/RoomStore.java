@@ -18,14 +18,18 @@ public enum RoomStore {
         this.serverRooms = new HashMap<>();
     }
 
+    public boolean hasServer(String server) {
+        return serverRooms.containsKey(server);
+    }
+
     public void putServer(String server) {
-        if (!serverRooms.containsKey(server)) {
+        if (!hasServer(server)) {
             serverRooms.put(server, new HashMap<>());
         }
     }
 
     public void putRoom(String server, Room room) {
-        if (!serverRooms.containsKey(server)) {
+        if (!hasServer(server)) {
             putServer(server);
         }
 
@@ -47,7 +51,7 @@ public enum RoomStore {
     }
 
     public void deleteServer(String server) {
-        if (serverRooms.containsKey(server)) {
+        if (hasServer(server)) {
             serverRooms.remove(server);
         }
     }

@@ -5,6 +5,7 @@ import com.animationlibationstudios.channel.inventory.model.Room;
 import com.animationlibationstudios.channel.inventory.model.Thing;
 import com.animationlibationstudios.channel.inventory.model.enumeration.Preposition;
 import com.animationlibationstudios.channel.inventory.persist.RoomStore;
+import com.animationlibationstudios.channel.inventory.persist.RoomStorePersister;
 import de.btobastian.javacord.DiscordAPI;
 import de.btobastian.javacord.entities.Channel;
 import de.btobastian.javacord.entities.message.Message;
@@ -15,6 +16,8 @@ import de.btobastian.sdcf4j.CommandExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+
 /**
  * Process !!put commands.
  */
@@ -22,16 +25,25 @@ import org.springframework.stereotype.Service;
 public class PutCommands implements CommandExecutor {
 
     @Autowired
+    private RoomStorePersister storage;
+
+    @Autowired
     private CommandArgumentParserUtil commandArgumentParserUtil;
 
     @Command(aliases = {"!!put"},
             description = "!!put <item> - Add 'item' to the current room.\n" +
-                    "!!put <item> -q # - Add # items to the current room.\n") // +
 //                    "!!put <item1> (on, in, under, behind) <item2> - Put 'item1' in/on/under/behind 'item2'.\n" +
-//                    "!!put <item> (on, in, under, behind) <item2> -q # - Put # 'item1's in/on/under/behind 'item2'.\n")
+//                    "!!put <item> (on, in, under, behind) <item2> -q # - Put # 'item1's in/on/under/behind 'item2'.\n" +
+                    "Arguments (must appear after the item name but otherwise can be in any order):\n" +
+                    "  -q # - Add quantity # items to the current room (0 means remove all items).\n" +
+                    "  -p <price> - Add price (where <price is a free-format string) to the item.\n" +
+                    "  -d <description> - Add a brief description to the item.\n")
     public String onCommand(DiscordAPI api, String command, String[] args, Message message) {
         String server = message.getChannelReceiver().getServer().getName();
         Channel channel = message.getChannelReceiver();
+
+        // Start by loading the server file if we need to, and if we can.
+        commandArgumentParserUtil.checkAndRead(server);
 
         Room room = RoomStore.DataStore.get(server, channel.getName());
         String returnMessage = String.format("There is no room associated with channel #%s.  To create one, type !!room add <name>", channel.getName());
@@ -45,11 +57,12 @@ public class PutCommands implements CommandExecutor {
                 thing.setName(putCmd.item);
                 thing.setQuantity(putCmd.quantity);
                 thing.setDescription(putCmd.description);
+                thing.setPrice(putCmd.price);
 
-                returnMessage = putThing(room, thing);
+                returnMessage = putThing(server, room, thing);
             } else {
-                if (putCmd.commandType.equals("invalidQtyPlacement")) {
-                    returnMessage = "Invalid command.  An item name must appear before '-q'.";
+                if (putCmd.commandType.equals("invalidArgPlacement")) {
+                    returnMessage = "Invalid command.  An item name must appear before any arguments (like '-d' or '-q').";
                 } else if (putCmd.commandType.equals("invalidQty")) {
                     returnMessage = "Invalid quantity specified.  '-q' must be followed by a valid, non-negative " +
                             "integer number (0 will remove all of the specified item).";
@@ -66,7 +79,7 @@ public class PutCommands implements CommandExecutor {
     /**
      *
      */
-    private String putThing(Room room, Thing thing) {
+    private String putThing(String server, Room room, Thing thing) {
         String returnMessage;
 
         // First see if there are already things in the room.
@@ -91,6 +104,7 @@ public class PutCommands implements CommandExecutor {
         }
 
         if (!found) {
+            room.getThings().add(thing);
             returnMessage = "Added a new '" + thing.getName() + "' to the room.";
         } else {
             if (removed) {
@@ -99,6 +113,14 @@ public class PutCommands implements CommandExecutor {
                 returnMessage = String.format("Added %d more %s(s) to the room for a new total of %d.",
                         thing.getQuantity(), thing.getName(), newQuantity);
             }
+        }
+
+        // Whenever we update the inventory data, write the contents to a file.
+        try {
+            storage.writeServer(server);
+        } catch (IOException e) {
+            returnMessage = String.format("Error occurred while attempting to write %s server contents to storage; message: %s",
+                    server, e.getMessage());
         }
 
         return returnMessage;
@@ -113,6 +135,7 @@ public class PutCommands implements CommandExecutor {
         String item;
         String description;
         int quantity;
+        String price;
 
         PutCmd(String[] args) {
             // Parse out and validate the operation
@@ -124,15 +147,16 @@ public class PutCommands implements CommandExecutor {
                 commandType = "item";
                 item = args[0];
                 preposition = null;
-                description = commandArgumentParserUtil.parseDescription(args);
+                description = commandArgumentParserUtil.parseArgument("-d", args);
             } else if (args.length > 1) {
-                // If the first argument is "-q" it's an error - need to provide the item first.
-                if ("-q".equalsIgnoreCase(args[0])) {
-                    commandType = "invalidQtyPlacement";
+                // If the first argument is "-q" or a" -p" it's an error - need to provide the item first.
+                if ("-q".equalsIgnoreCase(args[0]) || "-p".equalsIgnoreCase(args[0]) || "-d".equalsIgnoreCase(args[0])) {
+                    commandType = "invalidArgPlacement";
                 } else {
                     commandType = "item";
                     item = commandArgumentParserUtil.parseItemName(args);
-                    description = commandArgumentParserUtil.parseDescription(args);
+                    description = commandArgumentParserUtil.parseArgument("-d", args);
+                    price = commandArgumentParserUtil.parseArgument("-p", args);
                 }
 
                 // Now check and see if we find a quantity parameter
@@ -142,12 +166,13 @@ public class PutCommands implements CommandExecutor {
                     if ("-q".equalsIgnoreCase(arg)) {
                         hasAQuantity = true;
                     } else if (hasAQuantity) {
-                        // the next item had better be a well-formatted  non-negative integer number
+                        // the next item had better be a well-formatted, non-negative integer number
                         try {
                             qty = Integer.parseInt(arg);
                             if (qty < 0) {
                                 throw new NumberFormatException();
                             }
+                            break;
                         } catch (NumberFormatException e) {
                             commandType = "invalidQty";
                         }
