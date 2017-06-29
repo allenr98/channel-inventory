@@ -20,7 +20,6 @@ package com.animationlibationstudios.channel.inventory.commands;
 
 import com.animationlibationstudios.channel.inventory.commands.utility.CommandArgumentParserUtil;
 import com.animationlibationstudios.channel.inventory.model.Room;
-import com.animationlibationstudios.channel.inventory.model.Thing;
 import com.animationlibationstudios.channel.inventory.model.enumeration.RoomOperations;
 import com.animationlibationstudios.channel.inventory.persist.RoomStore;
 import com.animationlibationstudios.channel.inventory.persist.RoomStorePersister;
@@ -91,7 +90,7 @@ public class RoomCommands implements CommandExecutor {
     }
 
     /**
-     * The command is "!!room remove", build the response.
+     * The command is "!!room add", build the response.
      *
      * @param server The current server.
      * @param channel The current channel.
@@ -112,7 +111,7 @@ public class RoomCommands implements CommandExecutor {
             room = new Room();
             room.setChannel(channel.getName());
             room.setName(cmd.roomName);
-            room.setThings(new LinkedList<Thing>());
+            room.setThings(new LinkedList<>());
 
             if (argCount >= 3) {
                 room.setDescription(cmd.description);
@@ -156,9 +155,9 @@ public class RoomCommands implements CommandExecutor {
     /**
      * Once it's been determined that the command received was "!!room describe", build the response message.
      *
-     * @param room
-     * @param cmd
-     * @return
+     * @param room The room whose description is wanted.
+     * @param cmd The command object.
+     * @return Message string.
      */
     private String buildRoomDescribeResponse(String server, Room room, RoomCmd cmd, String defaultMessage) {
         String returnMessage = defaultMessage;
@@ -200,13 +199,9 @@ public class RoomCommands implements CommandExecutor {
         return returnMessage;
     }
 
-    @Command(aliases = {"!!cmd"}, description = "!!cmd - echo back the command")
-    public String echoBack(DiscordAPI api, String command, String[] args, Message message) {
-        RoomCmd cmd = new RoomCmd(args);
-
-        return new MessageBuilder().appendDecoration(cmd.toString(), MessageDecoration.CODE_LONG).toString();
-    }
-
+    /**
+     * Object representing a room command.
+     */
     private class RoomCmd {
         RoomOperations operation;
         String roomName;

@@ -8,7 +8,6 @@ import com.animationlibationstudios.channel.inventory.persist.RoomStore;
 import com.animationlibationstudios.channel.inventory.persist.RoomStorePersister;
 import de.btobastian.javacord.DiscordAPI;
 import de.btobastian.javacord.entities.Channel;
-import de.btobastian.javacord.entities.User;
 import de.btobastian.javacord.entities.message.Message;
 import de.btobastian.javacord.entities.message.MessageBuilder;
 import de.btobastian.javacord.entities.message.MessageDecoration;
@@ -33,8 +32,6 @@ public class PutCommands implements CommandExecutor {
 
     @Command(aliases = {"!!put"},
             description = "!!put <item> - Add 'item' to the current room.\n" +
-//                    "!!put <item1> (on, in, under, behind) <item2> - Put 'item1' in/on/under/behind 'item2'.\n" +
-//                    "!!put <item> (on, in, under, behind) <item2> -q # - Put # 'item1's in/on/under/behind 'item2'.\n" +
                     "Arguments (must appear after the item name but otherwise can be in any order):\n" +
                     "  -q # - Add quantity # items to the current room (0 means remove all items).\n" +
                     "  -p <price> - Add price (where <price is a free-format string) to the item.\n" +

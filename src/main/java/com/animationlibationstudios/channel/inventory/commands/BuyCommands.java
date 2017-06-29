@@ -17,8 +17,6 @@ import de.btobastian.sdcf4j.CommandExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-
 /**
  * Process !!buy commands.
  */

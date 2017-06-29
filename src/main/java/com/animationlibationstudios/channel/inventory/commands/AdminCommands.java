@@ -96,6 +96,15 @@ public class AdminCommands implements CommandExecutor {
 
     }
 
+    /**
+     * Do the work of setting the room admin.
+     *
+     * @param server The server object that the room is in.
+     * @param room The room object that the shop is in.
+     * @param requestor The person who requested the change.
+     * @param target The person to set as the new admin.
+     * @return message string.
+     */
     private String setRoomAdmin(Server server, Room room, User requestor, User target) {
         String returnMessage;
         room.setRoomAdmin(target);

@@ -19,7 +19,6 @@
 package com.animationlibationstudios.channel.inventory.commands;
 
 import com.animationlibationstudios.channel.inventory.model.Room;
-import com.animationlibationstudios.channel.inventory.persist.LocalFileRoomStorePersister;
 import com.animationlibationstudios.channel.inventory.persist.RoomStore;
 import com.animationlibationstudios.channel.inventory.persist.RoomStorePersister;
 import de.btobastian.javacord.DiscordAPI;
@@ -31,7 +30,6 @@ import de.btobastian.sdcf4j.CommandExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -43,13 +41,6 @@ public class ServerCommands implements CommandExecutor {
 
     @Autowired
     private RoomStorePersister storage;
-
-    @PostConstruct
-    public void checkAndSetPersister() {
-        if (null == storage) {
-            storage = new LocalFileRoomStorePersister();
-        }
-    }
 
     @Command(aliases = {"!!read"},
             description = "!!read - read server contents from storage. Everything added since the last inv!server write will be lost!")
@@ -86,6 +77,12 @@ public class ServerCommands implements CommandExecutor {
         return new MessageBuilder().appendDecoration(returnMessage, MessageDecoration.CODE_LONG).toString();
     }
 
+    /**
+     * Store the room contents in a room store.
+     *
+     * @param server The server.
+     * @param contents a map of all the server's contents (rooms, etc.).
+     */
     private void putServerContentsInRoomStore(String server, HashMap<String, Room> contents) {
         if (null != server && !server.isEmpty() && null != contents && !contents.isEmpty()) {
             RoomStore.DataStore.putServer(server);
