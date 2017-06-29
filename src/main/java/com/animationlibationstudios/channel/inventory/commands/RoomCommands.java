@@ -212,7 +212,7 @@ public class RoomCommands implements CommandExecutor {
             operation = null;
 
             if (isOperation(args[0])) {
-                operation = RoomOperations.valueOf(args[0]);
+                operation = RoomOperations.valueOf(args[0].toUpperCase());
 
                 // The next parameter, if there is one, should be the room name, but we want to allow it to be more than
                 // one word with spaces.  Let's grab all the next words until we hit the end of the line, or a "-d" to

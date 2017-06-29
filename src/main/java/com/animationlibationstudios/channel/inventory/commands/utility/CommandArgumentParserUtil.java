@@ -40,7 +40,7 @@ public class CommandArgumentParserUtil {
                         RoomStore.DataStore.putRoom(server, serverContents.get(channel));
                     }
                 }
-            } catch (IOException e) {
+            } catch (NullPointerException|IOException e) {
                 // The server doesn't have a file.  Not to worry, it'll get created the first time we write something
                 noop();
             }

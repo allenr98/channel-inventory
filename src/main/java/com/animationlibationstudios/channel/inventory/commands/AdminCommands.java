@@ -58,7 +58,7 @@ public class AdminCommands implements CommandExecutor {
         commandArgumentParserUtil.checkAndRead(serverName);
 
         if (room != null) {
-            if ("set".equalsIgnoreCase(args[0])) {
+            if (args.length > 0 && "set".equalsIgnoreCase(args[0])) {
                 if (room.getRoomAdmin() == null) {
                     if (target == null) {
                         returnMessage = setRoomAdmin(
