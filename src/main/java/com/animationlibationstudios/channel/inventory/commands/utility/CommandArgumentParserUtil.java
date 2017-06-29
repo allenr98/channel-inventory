@@ -87,6 +87,23 @@ public class CommandArgumentParserUtil {
         return builder.toString();
     }
 
+    public int parseQuantity(String[] words) throws NumberFormatException {
+        // Now check and see if we find a quantity parameter
+        boolean hasAQuantity = false;
+        int qty = 1;
+        for (String arg: words) {
+            if ("-q".equalsIgnoreCase(arg)) {
+                hasAQuantity = true;
+            } else if (hasAQuantity) {
+                // the next item had better be a well-formatted, non-negative integer number
+                qty = Integer.parseInt(arg);
+                break;
+            }
+        }
+        // will return 1 if there's no quantity specified.
+        return qty;
+    }
+
     /**
      * Iterate through the words array and start building when we find a "-d" and stop if we get to a "-q"
      *

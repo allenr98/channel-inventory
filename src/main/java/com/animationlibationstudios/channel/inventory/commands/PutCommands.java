@@ -74,7 +74,6 @@ public class PutCommands implements CommandExecutor {
         }
 
         return new MessageBuilder().appendDecoration(returnMessage, MessageDecoration.CODE_LONG).toString();
-
     }
 
     /**
@@ -166,25 +165,15 @@ public class PutCommands implements CommandExecutor {
                 }
 
                 // Now check and see if we find a quantity parameter
-                boolean hasAQuantity = false;
-                int qty = 1;
-                for (String arg: args) {
-                    if ("-q".equalsIgnoreCase(arg)) {
-                        hasAQuantity = true;
-                    } else if (hasAQuantity) {
-                        // the next item had better be a well-formatted, non-negative integer number
-                        try {
-                            qty = Integer.parseInt(arg);
-                            if (qty < 0) {
-                                throw new NumberFormatException();
-                            }
-                            break;
-                        } catch (NumberFormatException e) {
-                            commandType = "invalidQty";
-                        }
+                try {
+                    quantity = commandArgumentParserUtil.parseQuantity(args);
+                    if (quantity == 0) {
+                        throw new NumberFormatException();
                     }
+                } catch (NumberFormatException e) {
+                    commandType = "invalidQty";
+                    quantity = 0;
                 }
-                quantity = qty;
             }
         }
     }
