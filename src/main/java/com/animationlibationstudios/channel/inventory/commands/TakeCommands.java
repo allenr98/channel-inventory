@@ -18,10 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Process !!buy commands.
+ * Process !!take commands - they work pretty much like !!buy commands, but don't require any pricing checks.
  */
 @Service
-public class BuyCommands implements CommandExecutor {
+public class TakeCommands implements CommandExecutor {
 
     @Autowired
     private RoomStorePersister storage;
@@ -29,8 +29,8 @@ public class BuyCommands implements CommandExecutor {
     @Autowired
     private CommandArgumentParserUtil commandArgumentParserUtil;
 
-    @Command(aliases = {"!!buy", "!!b"},
-            description = "!!buy <item> - Buy one of the named item for the price shown.\n" +
+    @Command(aliases = {"!!take"},
+            description = "!!take <item> - Take one of the named item for the price shown.\n" +
                     "Arguments (must appear after the item name but otherwise can be in any order):\n" +
                     "  -q # - Buy quantity # items named at # times the price.\n")
     public String onCommand(DiscordAPI api, String command, String[] args, Message message) {
@@ -42,7 +42,6 @@ public class BuyCommands implements CommandExecutor {
 
         User requestor = message.getAuthor();
         String item;
-        String pricePaid = "";
 
         int quantity = 1;
 
@@ -51,7 +50,7 @@ public class BuyCommands implements CommandExecutor {
 
         if (room != null) {
             if (room.getThings() == null || room.getThings().isEmpty()) {
-                returnMessage = "There's nothing to buy here.  Type '!!look' to see what's available.";
+                returnMessage = "There's nothing to take here.  Type '!!look' to see what's available.";
             } else if ("-q".equalsIgnoreCase(args[0])) {
                 // invalid; you need to specify an item first.
                 returnMessage = "Invalid command.  An item name must appear before any arguments (like '-q').";
@@ -80,10 +79,13 @@ public class BuyCommands implements CommandExecutor {
                             theThing = thing;
 
                             if (theThing.getQuantity() >= quantity) {
-                                pricePaid = theThing.getPrice();
-                                weAreGood = true;
+                                if (theThing.getPrice() == null || theThing.getPrice().isEmpty()) {
+                                    weAreGood = true;
+                                } else {
+                                    returnMessage = String.format("You asked to take %d %s(s) but those have a price of %s - use !!buy instead.", quantity, item, thing.getPrice());
+                                }
                             } else {
-                                returnMessage = String.format("You asked to buy %d %s(s) but there is/are only %d in the room.", quantity, item, thing.getQuantity());
+                                returnMessage = String.format("You asked to take %d %s(s) but there is/are only %d in the room.", quantity, item, thing.getQuantity());
                             }
 
                             break;
@@ -99,18 +101,14 @@ public class BuyCommands implements CommandExecutor {
                                 theThing.setQuantity(theThing.getQuantity() - quantity);
                             }
 
-                            String priceString = "at no charge";
-                            if (pricePaid != null && !"".equals(pricePaid)) {
-                                priceString = String.format("and paid %s for each one", pricePaid);
-                            }
                             returnMessage = "Transaction complete. The seller has been private messaged the outcome of the transaction.  Thank you for shopping!";
 
-                            requestor.sendMessage(String.format("You have successfully purchased %d %s(s) from the shop in %s %s.",
-                                    quantity, item, room.getName(), priceString));
+                            requestor.sendMessage(String.format("You have successfully taken %d %s(s) from the shop in %s.",
+                                    quantity, item, room.getName()));
 
                             if (room.getRoomAdmin() != null) {
-                                room.getRoomAdmin().sendMessage(String.format("%s just completed a purchase of %d %s(s) from the shop in %s %s.",
-                                        requestor.getName(), quantity, item, room.getName(), priceString));
+                                room.getRoomAdmin().sendMessage(String.format("%s just took %d %s(s) from the shop in %s.",
+                                        requestor.getName(), quantity, item, room.getName()));
                                 returnMessage = "Transaction complete. Both buyer and seller have been private messaged " +
                                         "the outcome of the transaction.  Thank you for shopping!";
                             }
