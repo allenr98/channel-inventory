@@ -33,7 +33,6 @@ send a pull request!  The GitHub repository can be found at [channel-inventory](
 ### Room Commands
 | Command | Description | Alias(es) |
 |---|---|---|
-| `!!cmd` | Echo back the command |
 | `!!room` | What room am I in? | `!!rm` |
 | `!!room describe` | Retrieve the room name and description | `!!(room, rm) (describe, desc, d)` |
 | `!!room describe -d <description>` | Replace the room's description. | `!!(room, rm) (describe, desc, d) -d <description>` |
@@ -50,10 +49,10 @@ send a pull request!  The GitHub repository can be found at [channel-inventory](
 | |   `-d <description>` : include an item description. | |
 | `!!take <item>` | Take an item from the inventory. Only works for items that have no associated price. Taking the last one removes it from the inventory. | |
 | _arguments_ | These arguments can be added after the <item> name in a !!put command. | |
-| |   `-q <#>` : specify the quantity to !!put.  Must be a non-negative integer.  If it's 0 and the item already exists, it will be removed. | |
-| `!!buy <item>` | Take an item from the inventory. The buyer and room admin/owner will both be private messaged with the transaction details. Buying the last one removes it from the inventory. | |
+| |   `-q <#>` : specify the quantity to !!take.  Must be a non-negative integer.  If it's 0 and the item already exists, it will be removed. | |
+| `!!buy <item>` | Buy an item from the inventory. The buyer and room admin/owner will both be private messaged with the transaction details. Buying the last one removes it from the inventory. | |
 | _arguments_ | These arguments can be added after the <item> name in a !!put command. | |
-| |   `-q <#>` : specify the quantity to !!put.  Must be a non-negative integer.  If it's 0 and the item already exists, it will be removed. | |
+| |   `-q <#>` : specify the quantity to !!buy.  Must be a non-negative integer.  If it's 0 and the item already exists, it will be removed. | |
 
 ### Administrative/Utility Commands
 | Command | Description | Alias(es) |
