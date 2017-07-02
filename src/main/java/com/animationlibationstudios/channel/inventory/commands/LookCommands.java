@@ -98,9 +98,10 @@ public class LookCommands implements CommandExecutor {
     private String buildLookResponse(Room room, Channel channel) {
         String returnMessage;
 
+        // Embeds: https://anidiotsguide.gitbooks.io/discord-js-bot-guide/examples/using-embeds-in-messages.html
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle(room.getName());
-        embedBuilder.setColor(new Color(3447003));
+        embedBuilder.setColor(new Color(0xB63D32));
         embedBuilder.setDescription(room.getDescription());
 
         if (null == room.getThings() || room.getThings().isEmpty()) {
