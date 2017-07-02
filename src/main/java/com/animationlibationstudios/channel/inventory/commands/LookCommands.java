@@ -10,10 +10,13 @@ import de.btobastian.javacord.entities.Channel;
 import de.btobastian.javacord.entities.message.Message;
 import de.btobastian.javacord.entities.message.MessageBuilder;
 import de.btobastian.javacord.entities.message.MessageDecoration;
+import de.btobastian.javacord.entities.message.embed.EmbedBuilder;
 import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.awt.*;
 
 /**
  * Process !!look commands.
@@ -92,23 +95,35 @@ public class LookCommands implements CommandExecutor {
      * @param room The current room.
      * @return Response message.
      */
-    private String buildLookResponse(Room room) {
+    private String buildLookResponse(Room room, Channel channel) {
         String returnMessage;
+
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setTitle(room.getName());
+        embedBuilder.setColor(new Color(3447003));
+        embedBuilder.setDescription(room.getDescription());
 
         if (null == room.getThings() || room.getThings().isEmpty()) {
             returnMessage = String.format("Room '%s' has nothing in it.", room.getName());
         } else {
-            StringBuilder builder = new StringBuilder();
-            builder.append(String.format("**Room %s contains the following:**\n", room.getName()));
+//            StringBuilder builder = new StringBuilder();
+//            builder.append(String.format("**Room %s contains the following:**\n", room.getName()));
 
+            StringBuilder itemText = new StringBuilder();
             for (Thing thing : room.getThings()) {
                 String qty = thing.getQuantity() > 1 ? String.format(" (%d)", thing.getQuantity()) : "";
                 String price = thing.getPrice().isEmpty() ? "" : String.format(" [%s]", thing.getPrice());
-                builder.append(String.format("- %s%s%s\n", thing.getName(), qty, price));
+//                builder.append(String.format("- %s%s%s\n", thing.getName(), qty, price));
+                itemText.append(String.format("- %s%s%s\n", thing.getName(), qty, price));
             }
-
-            returnMessage = builder.toString();
+            embedBuilder.addField("Items in Room:", itemText.toString(), false);
+            returnMessage = null;
         }
+
+        if (returnMessage == null) {
+            channel.sendMessage(null, embedBuilder);
+        }
+
         return returnMessage;
     }
 
