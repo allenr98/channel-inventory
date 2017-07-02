@@ -1,4 +1,4 @@
-# Channel-Inventory <a href="#"><img src="https://img.shields.io/badge/Version-0.1.0-brightgreen.svg" alt="Latest version"></a>
+# Channel-Inventory <a href="#"><img src="https://img.shields.io/badge/Version-0.1.1-brightgreen.svg" alt="Latest version"></a>
 
 ## Original Concept
 This is a Discord bot based on Bastian Oppermann's excellent [JavacordBot](https://github.com/BtoBastian/JavacordBot).

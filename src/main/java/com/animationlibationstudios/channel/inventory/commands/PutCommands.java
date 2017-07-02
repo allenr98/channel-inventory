@@ -164,9 +164,6 @@ public class PutCommands implements CommandExecutor {
                 // Now check and see if we find a quantity parameter
                 try {
                     quantity = commandArgumentParserUtil.parseQuantity(args);
-                    if (quantity == 0) {
-                        throw new NumberFormatException();
-                    }
                 } catch (NumberFormatException e) {
                     commandType = "invalidQty";
                     quantity = 0;

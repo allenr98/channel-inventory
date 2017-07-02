@@ -16,7 +16,7 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 
-version = '0.1.0'
+version = '0.1.1'
 sourceCompatibility = 1.8
 
 repositories {
@@ -34,7 +34,7 @@ ext {
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter-actuator')
 	compile('org.springframework.boot:spring-boot-starter-cache')
-//	compile('org.springframework.cloud:spring-cloud-starter-aws')
+//	compile('org.springframework.cloud:spring-cloud-starter-aws') // May be needed later for data storage.
 	compile('org.springframework.boot:spring-boot-starter-jersey')
 	compile('org.springframework.boot:spring-boot-starter-social-facebook')
 	compile('org.springframework.boot:spring-boot-starter-web')

@@ -118,7 +118,7 @@ public class CommandArgumentParserUtil {
 // don't care about prepositions for now...            if (isPreposition(word)) { break; }
             // If we've started collecting description words and we hit a "-q" then we're done; break.  Otherwise just
             // keep skipping past.
-            if ("-q".equalsIgnoreCase(word) || "-p".equalsIgnoreCase(word) || "-p".equalsIgnoreCase(word)) {
+            if ("-q".equalsIgnoreCase(word) || "-p".equalsIgnoreCase(word) || "-d".equalsIgnoreCase(word)) {
                 if (start) {
                     break;
                 }

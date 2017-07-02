@@ -27,6 +27,7 @@ public class InfoCommand implements CommandExecutor {
         msgBuilder.appendDecoration("General information", MessageDecoration.BOLD);
         appendAuthor(msgBuilder, message);
         msgBuilder
+                .appendNewLine().append("• Version: 0.1.1 (beta)")
                 .appendNewLine().append("• Library: Javacord")
                 .appendNewLine().append("• Servers: " + api.getServers().size())
                 .appendNewLine().append("• GitHub: https://github.com/allenr98/channel-inventory")
