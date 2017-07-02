@@ -17,6 +17,8 @@ import de.btobastian.sdcf4j.CommandExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+
 /**
  * Process !!buy commands.
  */
@@ -35,9 +37,8 @@ public class BuyCommands implements CommandExecutor {
                     "  -q # - Buy quantity # items named at # times the price.\n")
     public String onCommand(DiscordAPI api, String command, String[] args, Message message) {
         Server server = message.getChannelReceiver().getServer();
-        String serverName = server.getName();
         Channel channel = message.getChannelReceiver();
-        Room room = RoomStore.DataStore.get(serverName, channel.getName());
+        Room room = RoomStore.DataStore.get(server.getName(), channel.getName());
         String returnMessage = String.format("There is no room associated with channel #%s.  To create one, type !!room add <name>", channel.getName());
 
         User requestor = message.getAuthor();
@@ -47,7 +48,7 @@ public class BuyCommands implements CommandExecutor {
         int quantity = 1;
 
         // Start by loading the server file if we need to, and if we can.
-        commandArgumentParserUtil.checkAndRead(serverName);
+        commandArgumentParserUtil.checkAndRead(server.getName());
 
         if (room != null) {
             if (room.getThings() == null || room.getThings().isEmpty()) {
@@ -113,6 +114,14 @@ public class BuyCommands implements CommandExecutor {
                                         requestor.getName(), quantity, item, room.getName(), priceString));
                                 returnMessage = "Transaction complete. Both buyer and seller have been private messaged " +
                                         "the outcome of the transaction.  Thank you for shopping!";
+                            }
+
+                            // Whenever we update the inventory data, write the contents to a file.
+                            try {
+                                storage.writeServer(server.getName());
+                            } catch (IOException e) {
+                                returnMessage = String.format("Error occurred while attempting to write %s server contents to storage; message: %s",
+                                        server.getName(), e.getMessage());
                             }
                         }
                     } else {

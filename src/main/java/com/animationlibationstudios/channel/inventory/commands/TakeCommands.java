@@ -17,6 +17,8 @@ import de.btobastian.sdcf4j.CommandExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+
 /**
  * Process !!take commands - they work pretty much like !!buy commands, but don't require any pricing checks.
  */
@@ -111,6 +113,14 @@ public class TakeCommands implements CommandExecutor {
                                         requestor.getName(), quantity, item, room.getName()));
                                 returnMessage = "Transaction complete. Both buyer and seller have been private messaged " +
                                         "the outcome of the transaction.  Thank you for shopping!";
+                            }
+
+                            // Whenever we update the inventory data, write the contents to a file.
+                            try {
+                                storage.writeServer(server.getName());
+                            } catch (IOException e) {
+                                returnMessage = String.format("Error occurred while attempting to write %s server contents to storage; message: %s",
+                                        server.getName(), e.getMessage());
                             }
                         }
                     } else {
