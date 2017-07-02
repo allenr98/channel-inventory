@@ -34,7 +34,7 @@ ext {
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter-actuator')
 	compile('org.springframework.boot:spring-boot-starter-cache')
-	compile('org.springframework.cloud:spring-cloud-starter-aws')
+//	compile('org.springframework.cloud:spring-cloud-starter-aws')
 	compile('org.springframework.boot:spring-boot-starter-jersey')
 	compile('org.springframework.boot:spring-boot-starter-social-facebook')
 	compile('org.springframework.boot:spring-boot-starter-web')
