@@ -50,7 +50,7 @@ public class LookCommands implements CommandExecutor {
             LookCmd lookCmd = new LookCmd(args);
 
             if (args.length == 0) {
-                returnMessage = buildLookResponse(room);
+                returnMessage = buildLookResponse(room, channel);
             } else if (lookCmd.commandType.equals("item")) {
                 returnMessage = buildLookItemResponse(room, lookCmd.item); // buildLookItemResponseRecursively(room, lookCmd.item);
             } else {
