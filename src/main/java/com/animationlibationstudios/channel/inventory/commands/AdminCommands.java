@@ -87,8 +87,12 @@ public class AdminCommands implements CommandExecutor {
                     }
                 }
             } else {
-                returnMessage = String.format("The current room admin is @%s",
-                        room.getRoomAdmin().getMentionTag());
+                if (room.getRoomAdmin() == null) {
+                    returnMessage = "There is no room admin set.  Use !!admin set to assign the room admin.";
+                } else {
+                    returnMessage = String.format("The current room admin is '%s'.",
+                            room.getRoomAdmin().getName());
+                }
             }
         }
 
