@@ -14,6 +14,7 @@ public class Thing {
 
     private int quantity;
     private String price;
+    private boolean permanent;
 
     private List<Thing> thingsOn;
     private List<Thing> thingsIn;
@@ -25,6 +26,14 @@ public class Thing {
         this.thingsIn = new LinkedList<>();
         this.thingsUnder = new LinkedList<>();
         this.thingsBehind = new LinkedList<>();
+    }
+
+    public boolean isPermanent() {
+        return permanent;
+    }
+
+    public void setPermanent(boolean permanent) {
+        this.permanent = permanent;
     }
 
     public String getPrice() {

@@ -80,16 +80,19 @@ public class TakeCommands implements CommandExecutor {
                         if (item.equalsIgnoreCase(thing.getName())) {
                             theThing = thing;
 
-                            if (theThing.getQuantity() >= quantity) {
-                                if (theThing.getPrice() == null || theThing.getPrice().isEmpty()) {
-                                    weAreGood = true;
-                                } else {
-                                    returnMessage = String.format("You asked to take %d %s(s) but those have a price of %s - use !!buy instead.", quantity, item, thing.getPrice());
-                                }
+                            if (theThing.isPermanent() && !(requestor == room.getRoomAdmin() || room.getRoomAdmin() == null)) {
+                                returnMessage = String.format("The %s is marked as permanent; only the room admin (%s) can take it/them.", theThing.getName(), room.getRoomAdmin().getMentionTag());
                             } else {
-                                returnMessage = String.format("You asked to take %d %s(s) but there is/are only %d in the room.", quantity, item, thing.getQuantity());
+                                if (theThing.getQuantity() >= quantity) {
+                                    if (theThing.getPrice() == null || theThing.getPrice().isEmpty()) {
+                                        weAreGood = true;
+                                    } else {
+                                        returnMessage = String.format("You asked to take %d %s(s) but those have a price of %s - use !!buy instead.", quantity, item, thing.getPrice());
+                                    }
+                                } else {
+                                    returnMessage = String.format("You asked to take %d %s(s) but there is/are only %d in the room.", quantity, item, thing.getQuantity());
+                                }
                             }
-
                             break;
                         }
                     }

@@ -30,8 +30,8 @@ public class InfoCommand implements CommandExecutor {
                 .appendNewLine().append("• Version: 0.1.1 (beta)")
                 .appendNewLine().append("• Library: Javacord")
                 .appendNewLine().append("• Servers: " + api.getServers().size())
+                .appendNewLine().append("• Website: http://masterrobbiewan.wix.com/quartermaster")
                 .appendNewLine().append("• GitHub: https://github.com/allenr98/channel-inventory")
-                .appendNewLine().append("• Website: {coming soon!}")
         ;
         appendUsers(msgBuilder, api);
         appendUptime(msgBuilder);

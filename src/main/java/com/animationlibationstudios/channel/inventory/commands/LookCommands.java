@@ -103,8 +103,13 @@ public class LookCommands implements CommandExecutor {
 
             for (Thing thing : room.getThings()) {
                 String qty = thing.getQuantity() > 1 ? String.format(" (%d)", thing.getQuantity()) : "";
-                String price = thing.getPrice().isEmpty() ? "" : String.format(" [%s]", thing.getPrice());
-                builder.append(String.format("- %s%s%s\n", thing.getName(), qty, price));
+                String price = "";
+                // Price isn't relevant for permanent things.
+                if (!thing.isPermanent()) {
+                    price = thing.getPrice().isEmpty() ? "" : String.format(" [%s]", thing.getPrice());
+                }
+                String perm = thing.isPermanent() ? " {Permanent}" : "";
+                builder.append(String.format("- %s%s%s%s\n", thing.getName(), qty, price, perm));
             }
 
             returnMessage = builder.toString();

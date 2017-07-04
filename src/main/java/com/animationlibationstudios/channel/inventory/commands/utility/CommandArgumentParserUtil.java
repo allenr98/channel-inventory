@@ -76,10 +76,10 @@ public class CommandArgumentParserUtil {
         StringBuilder builder = new StringBuilder();
         String space = "";
         for (String word: words) {
-// don't care about prepositions for now...            if (isPreposition(word)) { break; }
             if ("-q".equalsIgnoreCase(word)) { break; } // break if we hit a quantity arg
             if ("-d".equalsIgnoreCase(word)) { break; } // break if we hit a description arg
-            if ("-p".equalsIgnoreCase(word)) { break; } // break if we hit a description arg
+            if ("-p".equalsIgnoreCase(word)) { break; } // break if we hit a price arg
+            if ("-perm".equalsIgnoreCase(word) || "-permanent".equalsIgnoreCase(word)) { break; } // break if we hit a permanent arg
             builder.append(space).append(word);
             if ("".equals(space)) { space = " "; }
         }
@@ -104,6 +104,19 @@ public class CommandArgumentParserUtil {
         return qty;
     }
 
+    public boolean isPermanent(String[] words) {
+        // Now check and see if we find a quantity parameter
+        boolean perm = false;
+        for (String arg: words) {
+            if ("-perm".equalsIgnoreCase(arg) || "-permanent".equalsIgnoreCase(arg)) {
+                perm = true;
+                break;
+            }
+        }
+        // will return 1 if there's no quantity specified.
+        return perm;
+    }
+
     /**
      * Iterate through the words array and start building when we find a "-d" and stop if we get to a "-q"
      *
@@ -115,10 +128,14 @@ public class CommandArgumentParserUtil {
         String space = "";
         boolean start = false;
         for (String word: words) {
-// don't care about prepositions for now...            if (isPreposition(word)) { break; }
             // If we've started collecting description words and we hit a "-q" then we're done; break.  Otherwise just
             // keep skipping past.
-            if ("-q".equalsIgnoreCase(word) || "-p".equalsIgnoreCase(word) || "-d".equalsIgnoreCase(word)) {
+            // TODO: Swap the chained OR clauses with an enum.
+            if ("-q".equalsIgnoreCase(word) ||
+                    "-p".equalsIgnoreCase(word) ||
+                    "-d".equalsIgnoreCase(word) ||
+                    "-perm".equalsIgnoreCase(word) ||
+                    "-permanent".equalsIgnoreCase(word)) {
                 if (start) {
                     break;
                 }

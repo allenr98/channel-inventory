@@ -8,6 +8,7 @@ import com.animationlibationstudios.channel.inventory.persist.RoomStore;
 import com.animationlibationstudios.channel.inventory.persist.RoomStorePersister;
 import de.btobastian.javacord.DiscordAPI;
 import de.btobastian.javacord.entities.Channel;
+import de.btobastian.javacord.entities.User;
 import de.btobastian.javacord.entities.message.Message;
 import de.btobastian.javacord.entities.message.MessageBuilder;
 import de.btobastian.javacord.entities.message.MessageDecoration;
@@ -35,10 +36,12 @@ public class PutCommands implements CommandExecutor {
                     "Arguments (must appear after the item name but otherwise can be in any order):\n" +
                     "  -q # - Add quantity # items to the current room (0 means remove all items).\n" +
                     "  -p <price> - Add price (where <price is a free-format string) to the item.\n" +
-                    "  -d <description> - Add a brief description to the item.\n")
+                    "  -d <description> - Add a brief description to the item.\n" +
+                    "  -(perm, permanent) - make the item permanent (price is ignored)\n")
     public String onCommand(DiscordAPI api, String command, String[] args, Message message) {
         String server = message.getChannelReceiver().getServer().getName();
         Channel channel = message.getChannelReceiver();
+        User requestor = message.getAuthor();
 
         // Start by loading the server file if we need to, and if we can.
         commandArgumentParserUtil.checkAndRead(server);
@@ -57,7 +60,7 @@ public class PutCommands implements CommandExecutor {
                 thing.setDescription(putCmd.description);
                 thing.setPrice(putCmd.price);
 
-                returnMessage = putThing(server, room, thing);
+                returnMessage = putThing(server, room, thing, requestor);
             } else {
                 if (putCmd.commandType.equals("invalidArgPlacement")) {
                     returnMessage = "Invalid command.  An item name must appear before any arguments (like '-d' or '-q').";
@@ -76,12 +79,13 @@ public class PutCommands implements CommandExecutor {
     /**
      * Do the work of adding the thing to the room.
      */
-    private String putThing(String server, Room room, Thing thing) {
-        String returnMessage;
+    private String putThing(String server, Room room, Thing thing, User requestor) {
+        String returnMessage = "";
 
         // First see if there are already things in the room.
         boolean found = false;
         boolean removed = false;
+        boolean prohibited = false;
         int newQuantity = 0;
         for (Thing roomThing: room.getThings()) {
             if (roomThing.getName().equalsIgnoreCase(thing.getName())) {
@@ -89,8 +93,19 @@ public class PutCommands implements CommandExecutor {
 
                 // Zero essentially means to remove all the things from the room. (Set quantity to 0.)
                 if (thing.getQuantity() == 0) {
-                    room.getThings().remove(roomThing);
-                    removed = true;
+                    if (thing.isPermanent() && !(requestor == room.getRoomAdmin() || room.getRoomAdmin() == null)) {
+                        String roomAdmin;
+                        if (room.getRoomAdmin() == null) {
+                            roomAdmin = ".";
+                        } else {
+                            roomAdmin = String.format("; only the room admin (%s) can remove it/them.", room.getRoomAdmin().getMentionTag());
+                        }
+                        returnMessage = String.format("The %s is marked as permanent%s", thing.getName(), roomAdmin);
+                        prohibited = true;
+                    } else {
+                        room.getThings().remove(roomThing);
+                        removed = true;
+                    }
                 } else {
                     roomThing.setQuantity(roomThing.getQuantity() + thing.getQuantity());
                     newQuantity = roomThing.getQuantity();
@@ -111,7 +126,7 @@ public class PutCommands implements CommandExecutor {
                             thing.getName(), server, room.getChannel()));
                 }
                 returnMessage = String.format("Removed all %s(s) from the room.", thing.getName());
-            } else {
+            } else if (!prohibited) {
                 returnMessage = String.format("Added %d more %s(s) to the room for a new total of %d.",
                         thing.getQuantity(), thing.getName(), newQuantity);
             }
@@ -138,6 +153,7 @@ public class PutCommands implements CommandExecutor {
         String description;
         int quantity;
         String price;
+        boolean permanent;
 
         PutCmd(String[] args) {
             // Parse out and validate the operation
@@ -152,13 +168,22 @@ public class PutCommands implements CommandExecutor {
                 description = commandArgumentParserUtil.parseArgument("-d", args);
             } else if (args.length > 1) {
                 // If the first argument is "-q" or a" -p" it's an error - need to provide the item first.
-                if ("-q".equalsIgnoreCase(args[0]) || "-p".equalsIgnoreCase(args[0]) || "-d".equalsIgnoreCase(args[0])) {
+                if ("-q".equalsIgnoreCase(args[0]) ||
+                        "-p".equalsIgnoreCase(args[0]) ||
+                        "-perm".equalsIgnoreCase(args[0]) ||
+                        "-permanent".equalsIgnoreCase(args[0]) ||
+                        "-d".equalsIgnoreCase(args[0])) {
                     commandType = "invalidArgPlacement";
                 } else {
                     commandType = "item";
                     item = commandArgumentParserUtil.parseItemName(args);
                     description = commandArgumentParserUtil.parseArgument("-d", args);
-                    price = commandArgumentParserUtil.parseArgument("-p", args);
+                    permanent = commandArgumentParserUtil.isPermanent(args);
+
+                    // price only matters if the thing isn't permanent.
+                    if (!permanent) {
+                        price = commandArgumentParserUtil.parseArgument("-p", args);
+                    }
                 }
 
                 // Now check and see if we find a quantity parameter

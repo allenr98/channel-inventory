@@ -80,11 +80,15 @@ public class BuyCommands implements CommandExecutor {
                         if (item.equalsIgnoreCase(thing.getName())) {
                             theThing = thing;
 
-                            if (theThing.getQuantity() >= quantity) {
-                                pricePaid = theThing.getPrice();
-                                weAreGood = true;
+                            if (theThing.isPermanent()) {
+                                returnMessage = String.format("The %s is marked as permanent and cannot be bought", theThing.getName());
                             } else {
-                                returnMessage = String.format("You asked to buy %d %s(s) but there is/are only %d in the room.", quantity, item, thing.getQuantity());
+                                if (theThing.getQuantity() >= quantity) {
+                                    pricePaid = theThing.getPrice();
+                                    weAreGood = true;
+                                } else {
+                                    returnMessage = String.format("You asked to buy %d %s(s) but there is/are only %d in the room.", quantity, item, thing.getQuantity());
+                                }
                             }
 
                             break;
