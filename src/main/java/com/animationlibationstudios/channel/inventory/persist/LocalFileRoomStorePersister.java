@@ -8,9 +8,11 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import de.btobastian.javacord.utils.LoggerUtil;
 import org.slf4j.Logger;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Qualifier;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -20,6 +22,7 @@ import java.util.Map;
  * This class takes an object instance and writes is as a JSON file to the file system.
  */
 @Repository
+@Profile("default")
 public class LocalFileRoomStorePersister implements RoomStorePersister {
 
     /**
