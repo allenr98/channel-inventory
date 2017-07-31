@@ -22,7 +22,7 @@ import java.util.Map;
  * This class takes an object instance and writes is as a JSON file to the file system.
  */
 @Repository
-@Profile("default")
+@Profile("fileSystem")
 public class LocalFileRoomStorePersister implements RoomStorePersister {
 
     /**

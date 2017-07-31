@@ -10,11 +10,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
-@Profile("default")
+@Profile("dynamoDb")
 public class AwsClientConfig {
-    @Value("${cloud.aws.credentials.rob.accessKey}")
+    @Value("${cloud.aws.credentials.accessKey}")
     private String amazonAWSAccessKey;
-    @Value("${cloud.aws.credentials.rob.secretKey}")
+    @Value("${cloud.aws.credentials.secretKey}")
     private String amazonAWSSecretKey;
     @Value("${cloud.aws.region.static}")
     private String amazonAWSRegion;
