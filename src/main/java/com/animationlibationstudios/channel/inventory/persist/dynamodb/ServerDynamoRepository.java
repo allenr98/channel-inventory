@@ -48,26 +48,26 @@ public class ServerDynamoRepository extends BaseDynamoDbDao implements RoomStore
         private String serverName;
         private Room[] rooms;
 
-        Server() {}
+        public Server() {}
 
-        Server(String serverName) {
+        public Server(String serverName) {
             this.serverName = serverName;
             this.setRooms();
         }
 
         @DynamoDBHashKey(attributeName="serverName")
-        String getServerName() {
+        public String getServerName() {
             return serverName;
         }
-        void setServerName(String serverName) {
+        public void setServerName(String serverName) {
             this.serverName = serverName;
         }
 
         @DynamoDBAttribute(attributeName="rooms")
-        Room[] getRooms() { return rooms; }
-        void setRooms(Room[] rooms) { this.rooms = rooms; }
+        public Room[] getRooms() { return rooms; }
+        public void setRooms(Room[] rooms) { this.rooms = rooms; }
 
-        void setRooms() {
+        public void setRooms() {
             Room[] roomArray = null;
 
             if (serverName != null && !serverName.isEmpty()) {
