@@ -54,8 +54,8 @@ dependencies {
 
 	// Spring Data JPA, AWS Java SDK DynamoDB, Spring Data DynamoDB Community Module
 	compile('org.springframework.data:spring-data-releasetrain:Hopper-SR7')
-	compile('com.amazonaws:aws-java-sdk-dynamodb:1.11.105')
-	compile('com.github.derjust:spring-data-dynamodb:4.3.1')
+	compile('com.amazonaws:aws-java-sdk-dynamodb:1.11.170')
+	compile('com.github.derjust:spring-data-dynamodb:4.5.0')
 
 	runtime('org.springframework.boot:spring-boot-devtools')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
